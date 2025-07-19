@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
-import { ProductListingLayout } from '@/components/product/product-listing-layout'
+import { ProductListingLayout } from '@/components/product/listing'
 import { getCategoryBySlug } from '@/services/category.service'
 import { getProductsByCategory } from '@/services/product.service'
 

@@ -1,5 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 @import 'tailwindcss';
 @import 'tw-animate-css';
+
+/* NProgress Styles */
+#nprogress {
+  pointer-events: none;
+}
+
+#nprogress .bar {
+  background: linear-gradient(90deg, #8b5cf6, #3b82f6);
+  position: fixed;
+  z-index: 1031;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+}
+
+#nprogress .peg {
+  display: block;
+  position: absolute;
+  right: 0px;
+  width: 100px;
+  height: 100%;
+  box-shadow: 0 0 10px #8b5cf6, 0 0 5px #8b5cf6;
+  opacity: 1.0;
+  transform: rotate(3deg) translate(0px, -4px);
+}
+
+#nprogress .spinner {
+  display: none;
+}
+
+#nprogress .spinner-icon {
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  border: solid 2px transparent;
+  border-top-color: #8b5cf6;
+  border-left-color: #8b5cf6;
+  border-radius: 50%;
+  animation: nprogress-spinner 400ms linear infinite;
+}
+
+@keyframes nprogress-spinner {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  #nprogress .bar {
+    background: linear-gradient(90deg, #a855f7, #3b82f6);
+  }
+  
+  #nprogress .peg {
+    box-shadow: 0 0 10px #a855f7, 0 0 5px #a855f7;
+  }
+  
+  #nprogress .spinner-icon {
+    border-top-color: #a855f7;
+    border-left-color: #a855f7;
+  }
+}
 
 @custom-variant dark (&:is(.dark *));
 

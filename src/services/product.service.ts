@@ -88,14 +88,10 @@ export class ProductService {
       const products = getAllProducts()
       const product = products.find(product => product.slug === slug)
       
-      if (!product) {
-        throw throwApiError('Ürün bulunamadı.', 404)
-      }
-      
-      return product
+      return product || null
     } catch (error) {
       console.error('Failed to get product:', error)
-      throw error
+      return null
     }
   }
 

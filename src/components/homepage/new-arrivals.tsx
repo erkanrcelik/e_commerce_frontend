@@ -1,67 +1,42 @@
 
 import { SectionHeader } from '@/components/custom/section-header'
-import { ProductCarousel } from '@/components/product/product-carousel'
+import { ProductCarousel } from '@/components/product/shared/product-carousel'
 import type { Product } from '@/types/product'
 
 /**
- * New Arrivals Section Props
+ * New Arrivals Props
  */
 interface NewArrivalsProps {
-  /** Array of new arrival products to display */
+  /** New arrival products to display */
   products: Product[]
-  /** Section title */
-  title?: string
-  /** Section subtitle */
-  subtitle?: string
-  /** Additional CSS classes */
-  className?: string
 }
 
 /**
- * New Arrivals Section Component
+ * New Arrivals Component
  * 
- * Displays new arrival products in a horizontal carousel layout.
- * Used to showcase the latest products added to the catalog.
+ * Displays new arrival products in a carousel format.
  * 
  * Features:
- * - Horizontal product carousel
- * - Section header with view all link
+ * - Product carousel with navigation
+ * - New arrival highlighting
  * - Responsive design
- * - Purple theme integration
- * - Product interaction callbacks
  * 
  * @example
  * ```tsx
- * <NewArrivals
- *   products={newProducts}
- *   title="New Arrivals"
- *   subtitle="Fresh products just landed"
- * />
+ * <NewArrivals products={newProducts} />
  * ```
  */
-export function NewArrivals({ 
-  products, 
-  title = "New Arrivals", 
-  subtitle,
-  className
-}: NewArrivalsProps) {
+export function NewArrivals({ products }: NewArrivalsProps) {
   return (
-    <section className={`py-6 bg-white dark:bg-gray-950 ${className || ''}`}>
+    <section className="py-16 bg-gray-50 dark:bg-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
         <SectionHeader
-          title={title}
-          subtitle={subtitle}
-          viewAllHref="/products/new"
-          viewAllText="View All"
+          title="Yeni Gelenler"
         />
-
-        {/* Products Carousel */}
-        <ProductCarousel
-          products={products}
-          showNavigation={true}
-          className="!py-0"
-        />
+        
+        <div className="mt-12">
+          <ProductCarousel products={products} />
+        </div>
       </div>
     </section>
   )

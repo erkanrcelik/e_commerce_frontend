@@ -80,13 +80,13 @@ export function AuthLayout({
           </div>
 
           {/* Side Image Section */}
-          <div className="bg-gradient-to-br from-primary/10 to-primary/5 relative hidden lg:block">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent" />
+          <div className="bg-gradient-to-br from-indigo-500/10 to-purple-600/5 relative hidden lg:block">
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-transparent" />
             <div className="relative h-full flex items-center justify-center p-12">
               <div className="text-center space-y-4">
-                <div className="w-24 h-24 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
+                <div className="w-24 h-24 mx-auto bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
                   <svg
-                    className="w-12 h-12 text-primary"
+                    className="w-12 h-12 text-white"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -117,14 +117,14 @@ export function AuthLayout({
         By continuing, you agree to our{' '}
         <Link
           href="/terms"
-          className="underline underline-offset-4 hover:text-primary"
+          className="underline underline-offset-4 hover:text-indigo-600 dark:hover:text-indigo-400"
         >
           Terms of Service
         </Link>{' '}
         and{' '}
         <Link
           href="/privacy"
-          className="underline underline-offset-4 hover:text-primary"
+          className="underline underline-offset-4 hover:text-indigo-600 dark:hover:text-indigo-400"
         >
           Privacy Policy
         </Link>

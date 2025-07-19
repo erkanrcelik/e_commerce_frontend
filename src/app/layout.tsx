@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 
 import { ConditionalLayout } from '@/components/layout/conditional-layout'
+import { NProgressProvider } from '@/components/providers/nprogress-provider'
 import { Toaster } from '@/components/ui/sonner'
 import { ReduxProvider } from '@/providers/redux-provider'
 import './globals.css'
@@ -38,6 +39,7 @@ export const metadata: Metadata = {
  * - Global font configuration
  * - Redux state management
  * - Toast notifications
+ * - Progress bar for page transitions
  * - Conditional header/footer rendering
  * - SEO metadata
  * - Dark mode support
@@ -53,10 +55,12 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ReduxProvider>
-          <ConditionalLayout>
-            {children}
-          <Toaster /> 
-          </ConditionalLayout>
+          <NProgressProvider>
+            <ConditionalLayout>
+              {children}
+            <Toaster /> 
+            </ConditionalLayout>
+          </NProgressProvider>
         </ReduxProvider>
       </body>
     </html>

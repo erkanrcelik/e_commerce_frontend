@@ -102,7 +102,7 @@ export function LoginForm() {
       Don&apos;t have an account?{' '}
       <Link
         href="/register"
-        className="underline underline-offset-4 hover:text-primary"
+        className="underline underline-offset-4 hover:text-indigo-600 dark:hover:text-indigo-400"
       >
         Sign up
       </Link>
@@ -138,7 +138,7 @@ export function LoginForm() {
             <Label htmlFor="password">Password</Label>
             <Link
               href="/forgot-password"
-              className="text-sm underline-offset-2 hover:underline text-muted-foreground hover:text-primary"
+              className="text-sm underline-offset-2 hover:underline text-muted-foreground hover:text-indigo-600 dark:hover:text-indigo-400"
             >
               Forgot password?
             </Link>
@@ -164,7 +164,7 @@ export function LoginForm() {
             id="rememberMe"
             type="checkbox"
             {...register('rememberMe')}
-            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
             disabled={isLoading}
           />
           <Label

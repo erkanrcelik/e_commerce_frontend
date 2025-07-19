@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { ProductListingLayout } from '@/components/product/product-listing-layout'
+import { ProductListingLayout } from '@/components/product/listing'
 import { getCampaignBySlug } from '@/services/campaign.service'
 import { getProductsByCampaign } from '@/services/product.service'
 

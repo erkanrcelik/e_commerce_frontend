@@ -2,7 +2,7 @@
 
 import type { Product } from '@/types/product'
 
-import { ProductCard } from './product-card'
+import { ProductCard } from '../shared/product-card'
 
 /**
  * Product Grid Props

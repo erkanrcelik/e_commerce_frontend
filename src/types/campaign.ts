@@ -60,6 +60,15 @@ export interface Campaign {
   slug: string
   metaTitle?: string
   metaDescription?: string
+  
+  // Additional fields for UI
+  isActive?: boolean
+  discountPercentage?: number
+  productCount?: number
+  participantCount?: number
+  currentSales?: number
+  targetSales?: number
+  category?: string
 }
 
 /**
