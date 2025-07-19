@@ -1,131 +1,79 @@
-import api from '@/lib/axios'
-import type {
-  Campaign,
-  HomepageCampaigns,
-  NewsletterResponse,
-  NewsletterSubscription
-} from '@/types/campaign'
+import { throwApiError } from '@/lib/api-error'
+import type { Campaign } from '@/types/product'
 
 /**
- * Campaign API service
- * Handles all campaign-related API calls
+ * Campaign Service
+ * 
+ * Handles campaign-related API operations with simple error handling
  */
 export class CampaignService {
   /**
-   * Get homepage campaigns (daily deals, flash sales, featured offers)
+   * Get all campaigns
    */
-  static async getHomepageCampaigns(): Promise<HomepageCampaigns> {
+  static async getAllCampaigns(): Promise<Campaign[]> {
     try {
-      const response = await api.get<HomepageCampaigns>('/campaigns/homepage')
-      return response.data
+      const mockCampaigns: Campaign[] = [
+        {
+          id: 'summer-sale',
+          title: 'Yaz İndirimi',
+          slug: 'summer-sale',
+          description: 'Yaz sezonu ürünlerinde %50\'ye varan indirimler',
+          image: '/images/campaigns/summer-sale.jpg',
+          startDate: '2024-06-01T00:00:00Z',
+          endDate: '2024-08-31T23:59:59Z',
+          isActive: true,
+          discountPercentage: 50
+        },
+        {
+          id: 'new-arrivals',
+          title: 'Yeni Gelenler',
+          slug: 'new-arrivals',
+          description: 'En yeni ürünlerimizi keşfedin',
+          image: '/images/campaigns/new-arrivals.jpg',
+          startDate: '2024-01-01T00:00:00Z',
+          endDate: '2024-12-31T23:59:59Z',
+          isActive: true,
+          discountPercentage: 0
+        },
+        {
+          id: 'electronics-sale',
+          title: 'Elektronik İndirimi',
+          slug: 'electronics-sale',
+          description: 'Elektronik ürünlerde büyük indirim',
+          image: '/images/campaigns/electronics-sale.jpg',
+          startDate: '2024-01-01T00:00:00Z',
+          endDate: '2024-12-31T23:59:59Z',
+          isActive: true,
+          discountPercentage: 30
+        }
+      ]
+      return mockCampaigns
     } catch (error) {
-      console.error('Get homepage campaigns API error:', error)
-      throw error
-    }
-  }
-
-  /**
-   * Get active campaigns
-   */
-  static async getActiveCampaigns(limit = 10): Promise<Campaign[]> {
-    try {
-      const response = await api.get<{ campaigns: Campaign[] }>('/campaigns/active', {
-        params: { limit }
-      })
-      return response.data.campaigns
-    } catch (error) {
-      console.error('Get active campaigns API error:', error)
-      throw error
-    }
-  }
-
-  /**
-   * Get daily deals
-   */
-  static async getDailyDeals(limit = 6): Promise<Campaign[]> {
-    try {
-      const response = await api.get<{ campaigns: Campaign[] }>('/campaigns/daily-deals', {
-        params: { limit }
-      })
-      return response.data.campaigns
-    } catch (error) {
-      console.error('Get daily deals API error:', error)
-      throw error
-    }
-  }
-
-  /**
-   * Get flash sales
-   */
-  static async getFlashSales(limit = 6): Promise<Campaign[]> {
-    try {
-      const response = await api.get<{ campaigns: Campaign[] }>('/campaigns/flash-sales', {
-        params: { limit }
-      })
-      return response.data.campaigns
-    } catch (error) {
-      console.error('Get flash sales API error:', error)
-      throw error
+      console.error('Failed to get campaigns:', error)
+      throw throwApiError('Kampanyalar yüklenirken bir hata oluştu.')
     }
   }
 
   /**
    * Get campaign by slug
    */
-  static async getCampaignBySlug(slug: string): Promise<Campaign> {
+  static async getCampaignBySlug(slug: string): Promise<Campaign | null> {
     try {
-      const response = await api.get<{ campaign: Campaign }>(`/campaigns/${slug}`)
-      return response.data.campaign
+      const campaigns = await this.getAllCampaigns()
+      const campaign = campaigns.find(campaign => campaign.slug === slug)
+      
+      if (!campaign) {
+        throw throwApiError('Kampanya bulunamadı.', 404)
+      }
+      
+      return campaign
     } catch (error) {
-      console.error('Get campaign by slug API error:', error)
+      console.error('Failed to get campaign:', error)
       throw error
     }
   }
 }
 
-/**
- * Newsletter API service
- * Handles newsletter subscription
- */
-export class NewsletterService {
-  /**
-   * Subscribe to newsletter
-   */
-  static async subscribe(subscription: NewsletterSubscription): Promise<NewsletterResponse> {
-    try {
-      const response = await api.post<NewsletterResponse>('/newsletter/subscribe', subscription)
-      return response.data
-    } catch (error) {
-      console.error('Newsletter subscription API error:', error)
-      throw error
-    }
-  }
-
-  /**
-   * Unsubscribe from newsletter
-   */
-  static async unsubscribe(email: string): Promise<NewsletterResponse> {
-    try {
-      const response = await api.post<NewsletterResponse>('/newsletter/unsubscribe', { email })
-      return response.data
-    } catch (error) {
-      console.error('Newsletter unsubscribe API error:', error)
-      throw error
-    }
-  }
-
-  /**
-   * Check subscription status
-   */
-  static async checkSubscription(email: string): Promise<{ subscribed: boolean }> {
-    try {
-      const response = await api.get<{ subscribed: boolean }>('/newsletter/status', {
-        params: { email }
-      })
-      return response.data
-    } catch (error) {
-      console.error('Check newsletter subscription API error:', error)
-      throw error
-    }
-  }
-} 
+// Export individual functions for easier imports
+export const getAllCampaigns = CampaignService.getAllCampaigns
+export const getCampaignBySlug = CampaignService.getCampaignBySlug 

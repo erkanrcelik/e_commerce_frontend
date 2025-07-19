@@ -1,4 +1,19 @@
 /**
+ * Campaign interface
+ */
+export interface Campaign {
+  id: string
+  title: string
+  slug: string
+  description?: string
+  image?: string
+  startDate: string
+  endDate: string
+  isActive: boolean
+  discountPercentage?: number
+}
+
+/**
  * Product category interface
  */
 export interface Category {

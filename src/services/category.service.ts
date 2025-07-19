@@ -1,75 +1,73 @@
-import api from '@/lib/axios'
+import { getAllCategories as getMockCategories, getProductsByCategory as getMockProductsByCategory } from '@/data/mock-products'
+import { throwApiError } from '@/lib/api-error'
 import type { Category } from '@/types/product'
 
 /**
- * Category API service
- * Handles all category-related API calls
+ * Category Service
+ * 
+ * Handles category-related operations with simple error handling
  */
 export class CategoryService {
   /**
    * Get all categories
    */
-  static async getCategories(): Promise<Category[]> {
+  static async getAllCategories(): Promise<Category[]> {
     try {
-      const response = await api.get<{ categories: Category[] }>('/categories')
-      return response.data.categories
+      return getMockCategories()
     } catch (error) {
-      console.error('Get categories API error:', error)
-      throw error
-    }
-  }
-
-  /**
-   * Get featured categories for homepage
-   */
-  static async getFeaturedCategories(limit = 8): Promise<Category[]> {
-    try {
-      const response = await api.get<{ categories: Category[] }>('/categories/featured', {
-        params: { limit }
-      })
-      return response.data.categories
-    } catch (error) {
-      console.error('Get featured categories API error:', error)
-      throw error
+      console.error('Failed to get categories:', error)
+      throw throwApiError('Kategoriler yüklenirken bir hata oluştu.')
     }
   }
 
   /**
    * Get category by slug
    */
-  static async getCategoryBySlug(slug: string): Promise<Category> {
+  static async getCategoryBySlug(slug: string): Promise<Category | null> {
     try {
-      const response = await api.get<{ category: Category }>(`/categories/${slug}`)
-      return response.data.category
+      const categories = getMockCategories()
+      const category = categories.find((cat: Category) => cat.slug === slug)
+      
+      if (!category) {
+        throw throwApiError('Kategori bulunamadı.', 404)
+      }
+      
+      return category
     } catch (error) {
-      console.error('Get category by slug API error:', error)
+      console.error('Failed to get category:', error)
       throw error
     }
   }
 
   /**
-   * Get parent categories (top level)
+   * Get products by category
    */
-  static async getParentCategories(): Promise<Category[]> {
+  static async getProductsByCategory(categorySlug: string) {
     try {
-      const response = await api.get<{ categories: Category[] }>('/categories/parents')
-      return response.data.categories
+      const products = getMockProductsByCategory(categorySlug)
+      
+      if (products.length === 0) {
+        throw throwApiError('Bu kategoride ürün bulunamadı.', 404)
+      }
+      
+      return {
+        products,
+        pagination: {
+          total: products.length,
+          page: 1,
+          limit: 12,
+          totalPages: Math.ceil(products.length / 12),
+          hasNext: false,
+          hasPrev: false
+        }
+      }
     } catch (error) {
-      console.error('Get parent categories API error:', error)
+      console.error('Failed to get category products:', error)
       throw error
     }
   }
+}
 
-  /**
-   * Get subcategories by parent ID
-   */
-  static async getSubcategories(parentId: string): Promise<Category[]> {
-    try {
-      const response = await api.get<{ categories: Category[] }>(`/categories/${parentId}/subcategories`)
-      return response.data.categories
-    } catch (error) {
-      console.error('Get subcategories API error:', error)
-      throw error
-    }
-  }
-} 
+// Export individual functions for easier imports
+export const getAllCategories = CategoryService.getAllCategories
+export const getCategoryBySlug = CategoryService.getCategoryBySlug 
