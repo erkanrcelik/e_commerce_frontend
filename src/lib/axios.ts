@@ -187,47 +187,56 @@ api.interceptors.response.use(
         case 400:
           toast.error('Bad Request', {
             description: data?.message || 'Invalid request data',
+            duration: 3000
           })
           break
         case 403:
           toast.error('Access Denied', {
             description: 'You do not have permission to perform this action',
+            duration: 3000
           })
           break
         case 404:
           toast.error('Not Found', {
             description: 'The requested resource was not found',
+            duration: 3000
           })
           break
         case 422:
           toast.error('Validation Error', {
             description: data?.message || 'Please check your input',
+            duration: 3000
           })
           break
         case 429:
           toast.error('Too Many Requests', {
             description: 'Please slow down and try again later',
+            duration: 3000
           })
           break
         case 500:
           toast.error('Server Error', {
             description: 'Something went wrong on our end',
+            duration: 4000
           })
           break
         default:
           toast.error('Request Failed', {
             description: data?.message || 'An unexpected error occurred',
+            duration: 3000
           })
       }
     } else if (error.request) {
       // Network error
       toast.error('Network Error', {
         description: 'Please check your internet connection',
+        duration: 3000
       })
     } else {
       // Other error
       toast.error('Error', {
         description: error.message || 'An unexpected error occurred',
+        duration: 3000
       })
     }
 

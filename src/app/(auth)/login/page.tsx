@@ -12,7 +12,6 @@ export default function LoginPage() {
  * Page metadata
  */
 export const metadata = {
-  title: 'Sign In',
-  description:
-    'Sign in to your account to access your dashboard and manage your orders.',
+  title: 'Login',
+  description: 'Sign in to your account to access your profile and orders.',
 }

@@ -1,8 +1,8 @@
 import { RegisterForm } from '@/components/auth/register-form'
 
 /**
- * Registration page component
- * Renders the registration form for new users
+ * Register page component  
+ * Renders the registration form for new user signup
  */
 export default function RegisterPage() {
   return <RegisterForm />
@@ -12,7 +12,6 @@ export default function RegisterPage() {
  * Page metadata
  */
 export const metadata = {
-  title: 'Sign Up',
-  description:
-    'Create your account to start shopping and enjoy exclusive benefits.',
+  title: 'Register',
+  description: 'Create a new account to start shopping with exclusive deals and fast delivery.',
 }

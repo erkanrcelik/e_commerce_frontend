@@ -176,6 +176,19 @@ export class AuthService {
   }
 
   /**
+   * Get current authenticated user
+   */
+  static async getCurrentUser(): Promise<AuthResponse> {
+    try {
+      const response = await api.get<AuthResponse>('/auth/me')
+      return response.data
+    } catch (error) {
+      console.error('Get current user API error:', error)
+      throw error
+    }
+  }
+
+  /**
    * Resend email verification
    */
   static async resendVerification(): Promise<{ message: string }> {

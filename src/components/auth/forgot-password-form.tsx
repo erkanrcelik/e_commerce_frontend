@@ -12,11 +12,11 @@ import { clearError, forgotPassword } from '@/features/auth/authSlice'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { useToast } from '@/hooks/use-toast'
 import {
-    forgotPasswordSchema,
-    type ForgotPasswordFormData,
+  forgotPasswordSchema,
+  type ForgotPasswordFormData,
 } from '@/utils/validation'
 
-import { AuthLayout } from './auth-layout'
+import { AuthLayout } from '../layout/auth-layout'
 
 /**
  * Forgot password form component
@@ -193,3 +193,4 @@ export function ForgotPasswordForm() {
     </AuthLayout>
   )
 }
+ 

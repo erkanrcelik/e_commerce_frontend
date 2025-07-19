@@ -12,7 +12,7 @@ import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { useToast } from '@/hooks/use-toast'
 import { registerSchema, type RegisterFormData } from '@/utils/validation'
 
-import { AuthLayout } from './auth-layout'
+import { AuthLayout } from '../layout/auth-layout'
 
 /**
  * Registration form component

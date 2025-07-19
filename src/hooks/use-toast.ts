@@ -12,8 +12,8 @@ export interface ToastOptions {
   /** Toast message */
   message: string
   /** Optional description */
-  description?: string
-  /** Toast duration in milliseconds */
+  description?: string | React.ReactNode
+  /** Toast duration in milliseconds (default: 3000ms) */
   duration?: number
   /** Action button */
   action?: {
@@ -25,6 +25,13 @@ export interface ToastOptions {
 /**
  * Toast notification hook
  * Provides type-safe toast notifications with consistent styling
+ * 
+ * Features:
+ * - Auto-dismiss after 3 seconds by default
+ * - Close button on all toasts
+ * - Progress bar showing time remaining
+ * - Rich colors for different toast types
+ * - Theme-aware styling
  * 
  * @example
  * ```tsx
@@ -38,7 +45,7 @@ export function useToast() {
   /**
    * Show success toast notification
    */
-  const showSuccess = ({ message, description, duration, action }: ToastOptions) => {
+  const showSuccess = ({ message, description, duration = 3000, action }: ToastOptions) => {
     return toast.success(message, {
       description,
       duration,
@@ -52,7 +59,7 @@ export function useToast() {
   /**
    * Show error toast notification
    */
-  const showError = ({ message, description, duration, action }: ToastOptions) => {
+  const showError = ({ message, description, duration = 3000, action }: ToastOptions) => {
     return toast.error(message, {
       description,
       duration,
@@ -66,7 +73,7 @@ export function useToast() {
   /**
    * Show warning toast notification
    */
-  const showWarning = ({ message, description, duration, action }: ToastOptions) => {
+  const showWarning = ({ message, description, duration = 3000, action }: ToastOptions) => {
     return toast.warning(message, {
       description,
       duration,
@@ -80,7 +87,7 @@ export function useToast() {
   /**
    * Show info toast notification
    */
-  const showInfo = ({ message, description, duration, action }: ToastOptions) => {
+  const showInfo = ({ message, description, duration = 3000, action }: ToastOptions) => {
     return toast.info(message, {
       description,
       duration,
@@ -94,7 +101,7 @@ export function useToast() {
   /**
    * Show loading toast notification
    */
-  const showLoading = ({ message, description, duration }: Omit<ToastOptions, 'action'>) => {
+  const showLoading = ({ message, description, duration = 3000 }: Omit<ToastOptions, 'action'>) => {
     return toast.loading(message, {
       description,
       duration,
@@ -104,7 +111,7 @@ export function useToast() {
   /**
    * Show generic toast notification
    */
-  const showToast = ({ message, description, duration, action }: ToastOptions) => {
+  const showToast = ({ message, description, duration = 3000, action }: ToastOptions) => {
     return toast(message, {
       description,
       duration,
