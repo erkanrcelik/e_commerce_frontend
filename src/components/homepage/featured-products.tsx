@@ -9,6 +9,10 @@ import type { Product } from '@/types/product'
 interface FeaturedProductsProps {
   /** Featured products to display */
   products: Product[]
+  /** Section title */
+  title?: string
+  /** Section subtitle */
+  subtitle?: string
 }
 
 /**
@@ -26,12 +30,13 @@ interface FeaturedProductsProps {
  * <FeaturedProducts products={featuredProducts} />
  * ```
  */
-export function FeaturedProducts({ products }: FeaturedProductsProps) {
+export function FeaturedProducts({ products, title = "Featured Products", subtitle }: FeaturedProductsProps) {
   return (
     <section className="py-16 bg-white dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeader
-          title="Öne Çıkan Ürünler"
+          title={title}
+          subtitle={subtitle}
         />
         
         <div className="mt-12">

@@ -9,6 +9,10 @@ import type { Product } from '@/types/product'
 interface NewArrivalsProps {
   /** New arrival products to display */
   products: Product[]
+  /** Section title */
+  title?: string
+  /** Section subtitle */
+  subtitle?: string
 }
 
 /**
@@ -26,12 +30,13 @@ interface NewArrivalsProps {
  * <NewArrivals products={newProducts} />
  * ```
  */
-export function NewArrivals({ products }: NewArrivalsProps) {
+export function NewArrivals({ products, title = "New Arrivals", subtitle }: NewArrivalsProps) {
   return (
     <section className="py-16 bg-gray-50 dark:bg-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeader
-          title="Yeni Gelenler"
+          title={title}
+          subtitle={subtitle}
         />
         
         <div className="mt-12">

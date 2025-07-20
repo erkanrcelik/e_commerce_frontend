@@ -2,14 +2,14 @@
 
 import { usePathname, useSearchParams } from 'next/navigation'
 import NProgress from 'nprogress'
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 
 /**
  * NProgress Provider
  * 
- * Sayfa geçişlerinde header'ın üstünde progress bar gösterir
+ * Shows progress bar above header during page transitions
  */
-export function NProgressProvider({ children }: { children: React.ReactNode }) {
+function NProgressInner() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
@@ -26,7 +26,7 @@ export function NProgressProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     NProgress.start()
     
-    // Kısa bir gecikme ile progress'i tamamla
+    // Complete progress with a short delay
     const timer = setTimeout(() => {
       NProgress.done()
     }, 100)
@@ -37,5 +37,16 @@ export function NProgressProvider({ children }: { children: React.ReactNode }) {
     }
   }, [pathname, searchParams])
 
-  return <>{children}</>
+  return null
+}
+
+export function NProgressProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <Suspense fallback={null}>
+        <NProgressInner />
+      </Suspense>
+      {children}
+    </>
+  )
 } 

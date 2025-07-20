@@ -4,8 +4,8 @@ import { ProductListingLayout } from '@/components/product/listing'
 import { getProducts } from '@/services/product.service'
 
 export const metadata: Metadata = {
-  title: 'Ürün Arama - playableFactory',
-  description: 'Aradığınız ürünleri bulun ve karşılaştırın.',
+  title: 'Product Search - playableFactory',
+  description: 'Find and compare the products you are looking for.',
 }
 
 /**
@@ -22,9 +22,10 @@ export const metadata: Metadata = {
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: { q?: string }
+  searchParams: Promise<{ q?: string }>
 }) {
-  const searchQuery = searchParams.q || ''
+  const resolvedSearchParams = await searchParams
+  const searchQuery = resolvedSearchParams.q || ''
   
   const productsResponse = await getProducts({
     search: searchQuery,
@@ -35,8 +36,8 @@ export default async function SearchPage({
   return (
     <ProductListingLayout
       initialProducts={productsResponse.products}
-      title={searchQuery ? `"${searchQuery}" için arama sonuçları` : 'Ürün Arama'}
-      description={searchQuery ? `"${searchQuery}" ile ilgili ürünler` : 'Aradığınız ürünleri bulun ve karşılaştırın'}
+      title={searchQuery ? `Search results for "${searchQuery}"` : 'Product Search'}
+      description={searchQuery ? `Products related to "${searchQuery}"` : 'Find and compare the products you are looking for'}
       showCampaigns={true}
       initialSearchQuery={searchQuery}
     />

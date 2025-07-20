@@ -2,11 +2,13 @@ import { configureStore } from '@reduxjs/toolkit'
 
 import appSlice from '@/features/app/appSlice'
 import authSlice from '@/features/auth/authSlice'
+import cartSlice from '@/features/cart/cartSlice'
 
 export const store = configureStore({
   reducer: {
     auth: authSlice,
     app: appSlice,
+    cart: cartSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

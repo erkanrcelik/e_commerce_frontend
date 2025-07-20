@@ -64,6 +64,16 @@ export const LAYOUT_CONFIGS = {
     mainClassName: 'min-h-screen bg-gray-50 dark:bg-gray-900',
   } as LayoutConfig,
 
+  /** Layout for cart and checkout pages */
+  CART: {
+    showHeader: true,
+    showFooter: false,
+    showTopBanner: false,
+    showNavigation: false,
+    fullWidth: false,
+    mainClassName: 'min-h-screen bg-gray-50 dark:bg-gray-900',
+  } as LayoutConfig,
+
   /** Layout for admin/dashboard pages */
   ADMIN: {
     showHeader: false,
@@ -83,6 +93,7 @@ export const ROUTE_LAYOUT_MAP: Record<string, keyof typeof LAYOUT_CONFIGS> = {
   '/forgot-password': 'AUTH',
   '/reset-password': 'AUTH',
   '/verify-email': 'AUTH',
+  '/cart': 'CART',
   '/checkout': 'MINIMAL',
   '/payment': 'MINIMAL',
   '/admin': 'ADMIN',
