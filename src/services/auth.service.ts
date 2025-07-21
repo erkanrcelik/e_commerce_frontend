@@ -1,11 +1,16 @@
-import api, { removeAuthTokens, setAuthToken, setRefreshToken } from '@/lib/axios'
+import api, {
+  getAuthToken,
+  removeAuthTokens,
+  setAuthToken,
+  setRefreshToken,
+} from '@/lib/axios';
 import type {
   AuthResponse,
   ForgotPasswordFormData,
   LoginFormData,
   RegisterFormData,
   ResetPasswordFormData,
-} from '@/types/auth'
+} from '@/types/auth';
 
 /**
  * Authentication API service
@@ -17,19 +22,22 @@ export class AuthService {
    */
   static async login(credentials: LoginFormData): Promise<AuthResponse> {
     try {
-      const response = await api.post<AuthResponse>('/auth/login', credentials)
-      const { token, refreshToken } = response.data
+      const response = await api.post<AuthResponse>('/auth/login', {
+        ...credentials,
+        platform: 'customer'
+      });
+      const { accessToken, refreshToken } = response.data;
 
       // Store tokens in cookies
-      setAuthToken(token)
+      setAuthToken(accessToken);
       if (refreshToken) {
-        setRefreshToken(refreshToken)
+        setRefreshToken(refreshToken);
       }
 
-      return response.data
+      return response.data;
     } catch (error) {
-      console.error('Login API error:', error)
-      throw error
+      console.error('Login API error:', error);
+      throw error;
     }
   }
 
@@ -38,19 +46,22 @@ export class AuthService {
    */
   static async register(userData: RegisterFormData): Promise<AuthResponse> {
     try {
-      const response = await api.post<AuthResponse>('/auth/register', userData)
-      const { token, refreshToken } = response.data
+      const response = await api.post<AuthResponse>('/auth/register', {
+        ...userData,
+        platform: 'customer'
+      });
+      const { accessToken, refreshToken } = response.data;
 
       // Store tokens in cookies
-      setAuthToken(token)
+      setAuthToken(accessToken);
       if (refreshToken) {
-        setRefreshToken(refreshToken)
+        setRefreshToken(refreshToken);
       }
 
-      return response.data
+      return response.data;
     } catch (error) {
-      console.error('Register API error:', error)
-      throw error
+      console.error('Register API error:', error);
+      throw error;
     }
   }
 
@@ -64,11 +75,11 @@ export class AuthService {
       const response = await api.post<{ message: string }>(
         '/auth/forgot-password',
         emailData
-      )
-      return response.data
+      );
+      return response.data;
     } catch (error) {
-      console.error('Forgot password API error:', error)
-      throw error
+      console.error('Forgot password API error:', error);
+      throw error;
     }
   }
 
@@ -82,11 +93,11 @@ export class AuthService {
       const response = await api.post<{ message: string }>(
         '/auth/reset-password',
         resetData
-      )
-      return response.data
+      );
+      return response.data;
     } catch (error) {
-      console.error('Reset password API error:', error)
-      throw error
+      console.error('Reset password API error:', error);
+      throw error;
     }
   }
 
@@ -97,11 +108,11 @@ export class AuthService {
     try {
       const response = await api.get<{ message: string }>(
         `/auth/verify-email?token=${token}`
-      )
-      return response.data
+      );
+      return response.data;
     } catch (error) {
-      console.error('Email verification API error:', error)
-      throw error
+      console.error('Email verification API error:', error);
+      throw error;
     }
   }
 
@@ -110,14 +121,19 @@ export class AuthService {
    */
   static async logout(): Promise<void> {
     try {
-      // Call logout endpoint to invalidate token on server
-      await api.post('/auth/logout')
+      // Check if we have a valid token before making the API call
+      const token = getAuthToken();
+      if (token && token !== 'undefined') {
+        // Call logout endpoint to invalidate token on server
+        await api.post('/auth/logout');
+      }
     } catch (error) {
-      console.error('Logout API error:', error)
+      console.error('Logout API error:', error);
       // Continue with local logout even if API call fails
+      // This is important for offline scenarios or when backend is not available
     } finally {
       // Always remove tokens locally
-      removeAuthTokens()
+      removeAuthTokens();
     }
   }
 
@@ -128,11 +144,11 @@ export class AuthService {
     try {
       const response = await api.get<{ user: AuthResponse['user'] }>(
         '/auth/profile'
-      )
-      return response.data.user
+      );
+      return response.data.user;
     } catch (error) {
-      console.error('Get profile API error:', error)
-      throw error
+      console.error('Get profile API error:', error);
+      throw error;
     }
   }
 
@@ -140,18 +156,18 @@ export class AuthService {
    * Update user profile
    */
   static async updateProfile(profileData: {
-    name?: string
-    email?: string
+    name?: string;
+    email?: string;
   }): Promise<AuthResponse['user']> {
     try {
       const response = await api.put<{ user: AuthResponse['user'] }>(
         '/auth/profile',
         profileData
-      )
-      return response.data.user
+      );
+      return response.data.user;
     } catch (error) {
-      console.error('Update profile API error:', error)
-      throw error
+      console.error('Update profile API error:', error);
+      throw error;
     }
   }
 
@@ -159,19 +175,19 @@ export class AuthService {
    * Change password
    */
   static async changePassword(passwordData: {
-    currentPassword: string
-    newPassword: string
-    confirmPassword: string
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
   }): Promise<{ message: string }> {
     try {
       const response = await api.put<{ message: string }>(
         '/auth/change-password',
         passwordData
-      )
-      return response.data
+      );
+      return response.data;
     } catch (error) {
-      console.error('Change password API error:', error)
-      throw error
+      console.error('Change password API error:', error);
+      throw error;
     }
   }
 
@@ -180,11 +196,11 @@ export class AuthService {
    */
   static async getCurrentUser(): Promise<AuthResponse> {
     try {
-      const response = await api.get<AuthResponse>('/auth/me')
-      return response.data
+      const response = await api.get<AuthResponse>('/auth/me');
+      return response.data;
     } catch (error) {
-      console.error('Get current user API error:', error)
-      throw error
+      console.error('Get current user API error:', error);
+      throw error;
     }
   }
 
@@ -195,11 +211,11 @@ export class AuthService {
     try {
       const response = await api.post<{ message: string }>(
         '/auth/resend-verification'
-      )
-      return response.data
+      );
+      return response.data;
     } catch (error) {
-      console.error('Resend verification API error:', error)
-      throw error
+      console.error('Resend verification API error:', error);
+      throw error;
     }
   }
-} 
+}

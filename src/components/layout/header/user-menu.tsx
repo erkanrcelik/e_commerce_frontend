@@ -5,12 +5,12 @@ import Link from 'next/link'
 
 import { Button } from '@/components/ui/button'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useAppSelector } from '@/hooks/redux'
 
@@ -67,11 +67,11 @@ export function UserAccountMenu() {
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
                   <span className="text-white text-sm font-medium">
-                    {user.name?.charAt(0).toUpperCase()}
+                    {user.firstName?.charAt(0).toUpperCase()}
                   </span>
                 </div>
                 <div>
-                  <div className="font-medium">{user.name}</div>
+                  <div className="font-medium">{user.firstName} {user.lastName}</div>
                   <div className="text-xs text-gray-500">{user.email}</div>
                 </div>
               </div>

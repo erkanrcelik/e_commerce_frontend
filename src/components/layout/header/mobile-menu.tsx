@@ -5,11 +5,11 @@ import Link from 'next/link'
 
 import { Button } from '@/components/ui/button'
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
 } from '@/components/ui/sheet'
 import { useAppSelector } from '@/hooks/redux'
 import { mockCategories } from '@/lib/mock-data'
@@ -53,7 +53,7 @@ export function MobileMenu() {
           </SheetTitle>
           {isAuthenticated && (
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-              Welcome back, {user.name}!
+              Welcome back, {user.firstName}!
             </p>
           )}
         </SheetHeader>

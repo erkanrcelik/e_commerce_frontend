@@ -1,28 +1,29 @@
-'use client'
+'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod'
-import Link from 'next/link'
-import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { clearError, registerUser } from '@/features/auth/authSlice'
-import { useAppDispatch, useAppSelector } from '@/hooks/redux'
-import { useToast } from '@/hooks/use-toast'
-import { registerSchema, type RegisterFormData } from '@/utils/validation'
-
-import { AuthLayout } from '../layout/auth-layout'
+import { AuthLayout } from '@/components/layout/auth-layout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { clearError, registerUser } from '@/features/auth/authSlice';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux';
+import { useToast } from '@/hooks/use-toast';
+import { registerSchema, type RegisterFormData } from '@/utils/validation';
 
 /**
  * Registration form component
  * Handles customer registration with validation
  */
 export function RegisterForm() {
-  const dispatch = useAppDispatch()
-  const { status } = useAppSelector(state => state.auth)
-  const { showSuccess, showError, showLoading, dismiss } = useToast()
-  const isLoading = status === 'loading'
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  const { status } = useAppSelector(state => state.auth);
+  const { showSuccess, showError, showLoading, dismiss } = useToast();
+  const isLoading = status === 'loading';
 
   const {
     register,
@@ -38,30 +39,30 @@ export function RegisterForm() {
       confirmPassword: '',
       acceptTerms: false,
     },
-  })
+  });
 
   /**
    * Handle form submission
    * @param data - Form data from React Hook Form
    */
   const onSubmit = async (data: RegisterFormData) => {
-    let loadingToastId: string | number | undefined
+    let loadingToastId: string | number | undefined;
 
     try {
       // Clear any previous errors
-      dispatch(clearError())
+      dispatch(clearError());
 
       // Show loading toast
       loadingToastId = showLoading({
         message: 'Creating your account...',
         description: 'Please wait while we set up your account',
-      })
+      });
 
       // Dispatch register action
-      const result = await dispatch(registerUser(data))
+      const result = await dispatch(registerUser(data));
 
       // Dismiss loading toast
-      if (loadingToastId) dismiss(loadingToastId)
+      if (loadingToastId) dismiss(loadingToastId);
 
       if (registerUser.fulfilled.match(result)) {
         // Success
@@ -70,18 +71,23 @@ export function RegisterForm() {
           description: 'Welcome to our platform. You can now start shopping.',
           duration: 4000,
           action: {
-            label: 'Start Shopping',
+            label: 'Go to Dashboard',
             onClick: () => {
-              // Navigate to products or dashboard
-              // This will be implemented when we add navigation
-              // console.log('Navigate to products')
+              router.push('/');
             },
           },
-        })
-        reset()
+        });
+        
+        // Reset form
+        reset();
+        
+        // Redirect to dashboard after a short delay
+        setTimeout(() => {
+          router.push('/');
+        }, 2000);
       } else if (registerUser.rejected.match(result)) {
         // Error
-        const errorMessage = result.payload?.message || 'Registration failed'
+        const errorMessage = result.payload?.message || 'Registration failed';
         showError({
           message: 'Registration failed',
           description: errorMessage,
@@ -89,23 +95,23 @@ export function RegisterForm() {
             label: 'Try again',
             onClick: () => {
               // Focus on name field
-              const nameInput = document.getElementById('name')
-              nameInput?.focus()
+              const nameInput = document.getElementById('name');
+              nameInput?.focus();
             },
           },
-        })
+        });
       }
     } catch (error) {
       // Dismiss loading toast if still showing
-      if (loadingToastId) dismiss(loadingToastId)
+      if (loadingToastId) dismiss(loadingToastId);
 
-      console.error('Registration error:', error)
+      console.error('Registration error:', error);
       showError({
         message: 'Unexpected error',
         description: 'Something went wrong. Please try again.',
-      })
+      });
     }
-  }
+  };
 
   const footerContent = (
     <>
@@ -117,7 +123,7 @@ export function RegisterForm() {
         Sign in
       </Link>
     </>
-  )
+  );
 
   return (
     <AuthLayout
@@ -125,7 +131,12 @@ export function RegisterForm() {
       subtitle="Join our platform to start shopping"
       footerContent={footerContent}
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form
+        onSubmit={e => {
+          void handleSubmit(onSubmit)(e);
+        }}
+        className="space-y-4"
+      >
         {/* Name Field */}
         <div className="space-y-2">
           <Label htmlFor="name">Full Name</Label>
@@ -209,14 +220,14 @@ export function RegisterForm() {
           >
             I agree to the{' '}
             <Link
-              href="/terms"
+              href="/"
               className="underline underline-offset-2 hover:text-primary"
             >
               Terms of Service
             </Link>{' '}
             and{' '}
             <Link
-              href="/privacy"
+              href="/"
               className="underline underline-offset-2 hover:text-primary"
             >
               Privacy Policy
@@ -235,6 +246,5 @@ export function RegisterForm() {
         </Button>
       </form>
     </AuthLayout>
-  )
+  );
 }
-
