@@ -10,44 +10,35 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import type { Product } from '@/types/product'
 
 /**
- * Product List Props
+ * Product List Component
+ *
+ * Displays a list of products in a grid layout with wishlist functionality.
+ * Supports campaign indicators and responsive design.
+ *
+ * @param products - Array of products to display
+ * @param showCampaigns - Whether to show campaign indicators
+ * @param className - Additional CSS classes
+ *
+ * @example
+ * ```tsx
+ * <ProductList products={products} showCampaigns={true} />
+ * ```
  */
 interface ProductListProps {
   /** Products to display */
-  products: Product[]
+  products: any[]
   /** Show campaign indicators */
   showCampaigns?: boolean
   /** Additional CSS classes */
   className?: string
 }
 
-/**
- * Product List Component
- * 
- * Displays products in a list layout with detailed information.
- * 
- * Features:
- * - List layout with product details
- * - Campaign indicators
- * - Quick actions (wishlist, quick view)
- * - Responsive design
- * 
- * @example
- * ```tsx
- * <ProductList
- *   products={filteredProducts}
- *   showCampaigns={true}
- * />
- * ```
- */
-export function ProductList({
-  products,
-  className
-}: ProductListProps) {
-  const [wishlistedProducts, setWishlistedProducts] = useState<Set<string>>(new Set())
+export function ProductList({ products, className }: ProductListProps) {
+  const [wishlistedProducts, setWishlistedProducts] = useState<Set<string>>(
+    new Set()
+  )
 
   const toggleWishlist = (productId: string) => {
     setWishlistedProducts(prev => {
@@ -63,18 +54,21 @@ export function ProductList({
 
   return (
     <div className={`space-y-4 ${className || ''}`}>
-      {products.map((product) => (
-        <Card key={product.id} className="p-6 hover:shadow-lg transition-shadow">
+      {products.map(product => (
+        <Card
+          key={product._id}
+          className="p-6 hover:shadow-lg transition-shadow"
+        >
           <div className="flex gap-6">
             {/* Product Image */}
             <div className="relative w-32 h-32 flex-shrink-0">
               <Image
-                src={product.images[0]?.url || '/placeholder-product.jpg'}
+                src={product.imageUrls?.[0] || '/placeholder-product.jpg'}
                 alt={product.name}
                 fill
                 className="object-cover rounded-lg"
               />
-              
+
               {/* Product Badges */}
               <div className="absolute top-2 left-2 flex flex-col gap-1">
                 {product.isNew && (
@@ -117,20 +111,16 @@ export function ProductList({
                     onClick={() => toggleWishlist(product.id)}
                     className="h-8 w-8 p-0"
                   >
-                    <Heart 
+                    <Heart
                       className={cn(
-                        "w-4 h-4",
-                        wishlistedProducts.has(product.id) 
-                          ? "text-red-500 fill-red-500" 
-                          : "text-gray-400"
-                      )} 
+                        'w-4 h-4',
+                        wishlistedProducts.has(product.id)
+                          ? 'text-red-500 fill-red-500'
+                          : 'text-gray-400'
+                      )}
                     />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                  >
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                     <Eye className="w-4 h-4 text-gray-400" />
                   </Button>
                 </div>
@@ -138,22 +128,37 @@ export function ProductList({
 
               {/* Rating */}
               <div className="flex items-center gap-2 mb-3">
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      className={cn(
-                        "w-4 h-4",
-                        i < Math.floor(product.averageRating)
-                          ? "text-yellow-400 fill-current"
-                          : "text-gray-300"
-                      )}
-                    />
-                  ))}
-                </div>
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  ({product.totalReviews} reviews)
-                </span>
+                {product.averageRating && product.averageRating > 0 ? (
+                  <>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          className={cn(
+                            'w-4 h-4',
+                            i < Math.floor(product.averageRating)
+                              ? 'text-yellow-400 fill-current'
+                              : 'text-gray-300'
+                          )}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      ({product.reviewCount || product.totalReviews || 0} reviews)
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star key={i} className="w-4 h-4 text-gray-300" />
+                      ))}
+                    </div>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      No reviews yet
+                    </span>
+                  </>
+                )}
               </div>
 
               {/* Price */}
@@ -161,16 +166,18 @@ export function ProductList({
                 <span className="text-xl font-bold text-gray-900 dark:text-white">
                   ${product.price.toFixed(2)}
                 </span>
-                {product.originalPrice && product.originalPrice > product.price && (
-                  <span className="text-sm text-gray-500 dark:text-gray-400 line-through">
-                    ${product.originalPrice.toFixed(2)}
-                  </span>
-                )}
-                {product.originalPrice && product.originalPrice > product.price && (
-                  <Badge className="bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400 text-xs">
-                    Save ${(product.originalPrice - product.price).toFixed(2)}
-                  </Badge>
-                )}
+                {product.originalPrice &&
+                  product.originalPrice > product.price && (
+                    <span className="text-sm text-gray-500 dark:text-gray-400 line-through">
+                      ${product.originalPrice.toFixed(2)}
+                    </span>
+                  )}
+                {product.originalPrice &&
+                  product.originalPrice > product.price && (
+                    <Badge className="bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400 text-xs">
+                      Save ${(product.originalPrice - product.price).toFixed(2)}
+                    </Badge>
+                  )}
               </div>
 
               {/* Add to Cart */}
@@ -181,7 +188,9 @@ export function ProductList({
                   className="flex-1"
                 />
                 <span className="text-sm text-gray-600 dark:text-gray-400">
-                  {product.isInStock ? `${product.stock} in stock` : 'Out of stock'}
+                  {product.isInStock
+                    ? `${product.stock} in stock`
+                    : 'Out of stock'}
                 </span>
               </div>
             </div>
@@ -190,4 +199,4 @@ export function ProductList({
       ))}
     </div>
   )
-} 
+}

@@ -1,5 +1,5 @@
 import { Card } from '@/components/ui/card'
-import type { Product } from '@/types/product'
+import type { Product } from '@/types/customer-product'
 
 /**
  * Product Specifications Props
@@ -11,82 +11,60 @@ interface ProductSpecificationsProps {
 
 /**
  * Product Specifications Component
- * 
- * Displays product specifications in a table format.
- * 
+ *
+ * Displays product specifications from API data.
+ * Only shows data that is returned by the API.
+ *
  * Features:
- * - Technical specifications
- * - Product details
- * - Organized table layout
- * 
+ * - Technical specifications from API
+ * - Product details from API
+ * - Conditional rendering based on API data
+ *
  * @example
  * ```tsx
  * <ProductSpecifications product={product} />
  * ```
  */
 export function ProductSpecifications({ product }: ProductSpecificationsProps) {
-  // Mock specifications based on product category
-  const getSpecifications = () => {
-    const baseSpecs = [
-      { label: 'Ürün Kodu', value: product.sku },
-      { label: 'Kategori', value: product.category?.name },
-      { label: 'Stok Durumu', value: product.isInStock ? 'Stokta' : 'Stokta Yok' },
-      { label: 'Stok Adedi', value: product.stock.toString() },
-    ]
+  // Use specifications from API if available
+  const specifications = product.specifications
+    ? Object.entries(product.specifications).map(([key, value]) => ({
+        label: key.charAt(0).toUpperCase() + key.slice(1),
+        value: value,
+      }))
+    : []
 
-    // Add category-specific specifications
-    if (product.categoryId === 'smartphones') {
-      return [
-        ...baseSpecs,
-        { label: 'Ekran Boyutu', value: '6.1 inç' },
-        { label: 'İşlemci', value: 'A17 Pro' },
-        { label: 'RAM', value: '8 GB' },
-        { label: 'Depolama', value: '256 GB' },
-        { label: 'Kamera', value: '48 MP Ana + 12 MP Ultra Geniş' },
-        { label: 'Pil', value: '4000 mAh' },
-        { label: 'İşletim Sistemi', value: 'iOS 17' },
-      ]
-    }
+  // Add basic product info
+  const basicSpecs = [
+    { label: 'Product ID', value: product._id },
+    { label: 'Category', value: product.category?.name },
+    {
+      label: 'Stock Status',
+      value: product.stock > 0 ? 'In Stock' : 'Out of Stock',
+    },
+    { label: 'Stock Quantity', value: product.stock.toString() },
+    {
+      label: 'Average Rating',
+      value: product?.averageRating?.toFixed(1) || '0.0',
+    },
+    { label: 'Review Count', value: product?.reviewCount?.toString() || '0' },
+  ]
 
-    if (product.categoryId === 'laptops') {
-      return [
-        ...baseSpecs,
-        { label: 'Ekran Boyutu', value: '13.3 inç' },
-        { label: 'İşlemci', value: 'Apple M2' },
-        { label: 'RAM', value: '8 GB' },
-        { label: 'Depolama', value: '256 GB SSD' },
-        { label: 'Grafik', value: 'Entegre' },
-        { label: 'İşletim Sistemi', value: 'macOS' },
-        { label: 'Ağırlık', value: '1.24 kg' },
-      ]
-    }
+  const allSpecifications = [...basicSpecs, ...specifications]
 
-    if (product.categoryId === 'headphones') {
-      return [
-        ...baseSpecs,
-        { label: 'Kablosuz', value: 'Evet' },
-        { label: 'Gürültü Engelleme', value: 'Aktif' },
-        { label: 'Pil Ömrü', value: '30 saat' },
-        { label: 'Şarj Süresi', value: '3 saat' },
-        { label: 'Bağlantı', value: 'Bluetooth 5.0' },
-        { label: 'Ağırlık', value: '250 g' },
-      ]
-    }
-
-    return baseSpecs
+  if (allSpecifications.length === 0) {
+    return null
   }
-
-  const specifications = getSpecifications()
 
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-        Ürün Özellikleri
+        Product Specifications
       </h2>
 
       <Card className="overflow-hidden">
         <div className="divide-y divide-gray-200 dark:divide-gray-700">
-          {specifications.map((spec, index) => (
+          {allSpecifications.map((spec, index) => (
             <div
               key={index}
               className="flex items-center justify-between py-4 px-6 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
@@ -102,35 +80,33 @@ export function ProductSpecifications({ product }: ProductSpecificationsProps) {
         </div>
       </Card>
 
-      {/* Additional Info */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="p-4 text-center">
-          <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-            {product.averageRating}
+      {/* Product Variants - Only show if available */}
+      {product.variants && product.variants.length > 0 && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Product Variants
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {product.variants.map((variant, index) => (
+              <Card key={index} className="p-4">
+                <div className="space-y-2">
+                  <h4 className="font-medium text-gray-900 dark:text-white">
+                    {variant.name}
+                  </h4>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Price: ${variant.price}
+                    </span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Stock: {variant.stock}
+                    </span>
+                  </div>
+                </div>
+              </Card>
+            ))}
           </div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            Ortalama Puan
-          </div>
-        </Card>
-        
-        <Card className="p-4 text-center">
-          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-            {product.totalReviews}
-          </div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            Değerlendirme
-          </div>
-        </Card>
-        
-        <Card className="p-4 text-center">
-          <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-            {product.isInStock ? 'Var' : 'Yok'}
-          </div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            Stok Durumu
-          </div>
-        </Card>
-      </div>
+        </div>
+      )}
     </div>
   )
-} 
+}

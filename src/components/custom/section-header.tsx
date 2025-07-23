@@ -21,17 +21,17 @@ interface SectionHeaderProps {
 
 /**
  * Section Header Component
- * 
+ *
  * Reusable header component for sections with title, subtitle and optional "view all" link.
  * Used across multiple sections like Featured Products, New Arrivals, etc.
- * 
+ *
  * Features:
  * - Configurable title and subtitle
  * - Optional "view all" link with hover animations
  * - Responsive typography
  * - Purple theme integration
  * - Flexible layout
- * 
+ *
  * @example
  * ```tsx
  * <SectionHeader
@@ -46,12 +46,14 @@ export function SectionHeader({
   title,
   subtitle,
   viewAllHref,
-  viewAllText = "View All",
+  viewAllText = 'View All',
   hideViewAll = false,
   className,
 }: SectionHeaderProps) {
   return (
-    <div className={`flex items-center justify-between mb-8 ${className || ''}`}>
+    <div
+      className={`flex items-center justify-between mb-8 ${className || ''}`}
+    >
       {/* Title and Subtitle */}
       <div>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -76,4 +78,4 @@ export function SectionHeader({
       )}
     </div>
   )
-} 
+}

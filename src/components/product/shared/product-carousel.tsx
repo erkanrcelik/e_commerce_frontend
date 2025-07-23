@@ -1,14 +1,13 @@
 'use client'
 
-
 import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
+    Carousel,
+    CarouselContent,
+    CarouselItem,
+    CarouselNext,
+    CarouselPrevious,
 } from '@/components/ui/carousel'
-import type { Product } from '@/types/product'
+import type { Product } from '@/types/customer-product'
 
 import { ProductCard } from './product-card'
 
@@ -26,20 +25,14 @@ interface ProductCarouselProps {
   showNavigation?: boolean
   /** Additional CSS classes */
   className?: string
-  /** Callback when a product is added to cart */
-  onAddToCart?: (product: Product) => void
-  /** Callback when quick view is triggered */
-  onQuickView?: (product: Product) => void
-  /** Callback when wishlist is toggled */
-  onWishlist?: (product: Product) => void
 }
 
 /**
  * Product Carousel Component
- * 
+ *
  * Displays a horizontal scrollable list of products in a carousel format.
  * Supports responsive design with different item counts per screen size.
- * 
+ *
  * @example
  * ```tsx
  * <ProductCarousel
@@ -63,9 +56,6 @@ export function ProductCarousel({
   subtitle,
   showNavigation = true,
   className,
-  onAddToCart,
-  onQuickView,
-  onWishlist,
 }: ProductCarouselProps) {
   // Don't render if no products
   if (!products || products.length === 0) {
@@ -84,9 +74,7 @@ export function ProductCarousel({
               </h2>
             )}
             {subtitle && (
-              <p className="text-gray-600 dark:text-gray-300">
-                {subtitle}
-              </p>
+              <p className="text-gray-600 dark:text-gray-300">{subtitle}</p>
             )}
           </div>
         )}
@@ -95,26 +83,24 @@ export function ProductCarousel({
         <div className="relative">
           <Carousel
             opts={{
-              align: "start",
+              align: 'start',
               loop: false,
               skipSnaps: false,
-              containScroll: "trimSnaps",
+              containScroll: 'trimSnaps',
             }}
             className="w-full"
           >
             <CarouselContent className="-ml-2 md:-ml-4">
               {products.map((product, index) => (
                 <CarouselItem
-                  key={`product-${product.id}-${index}`}
-                  className="pl-2 md:pl-4 basis-[240px] sm:basis-[260px] md:basis-[280px] lg:basis-[240px]"
+                  key={`product-${product._id}-${index}`}
+                  className="pl-2 md:pl-4 basis-[240px] sm:basis-[260px] md:basis-[280px] lg:basis-[240px] h-full"
                 >
                   <div className="h-full">
                     <ProductCard
                       product={product}
-                      onAddToCart={onAddToCart}
-                      onQuickView={onQuickView}
-                      onWishlist={onWishlist}
-                      className="h-full"
+                      showWishlist={true}
+                      showAddToCart={true}
                     />
                   </div>
                 </CarouselItem>
@@ -130,8 +116,6 @@ export function ProductCarousel({
             )}
           </Carousel>
         </div>
-
-      
       </div>
     </section>
   )
@@ -155,10 +139,10 @@ interface ProductCarouselContainerProps {
 
 /**
  * Product Carousel Container
- * 
+ *
  * A wrapper component that provides default styling and responsive behavior
  * for the ProductCarousel component with common e-commerce use cases.
- * 
+ *
  * @example
  * ```tsx
  * <ProductCarouselContainer
@@ -170,7 +154,7 @@ interface ProductCarouselContainerProps {
  */
 export function ProductCarouselContainer({
   products,
-  title = "Featured Products",
+  title = 'Featured Products',
   subtitle,
   maxProducts = 20,
   className,
@@ -190,4 +174,4 @@ export function ProductCarouselContainer({
       </div>
     </div>
   )
-} 
+}

@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card'
 
 /**
  * Not Found Page
- * 
+ *
  * Modern 404 page with clean design and helpful navigation.
  */
 export default function NotFound() {
@@ -23,7 +23,7 @@ export default function NotFound() {
               <span className="text-xs text-white font-bold">404</span>
             </div>
           </div>
-          
+
           {/* Content */}
           <div className="space-y-3">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -37,13 +37,20 @@ export default function NotFound() {
           {/* Action Buttons */}
           <div className="flex gap-3 w-full">
             <Link href="/" className="flex-1">
-              <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg" size="lg">
+              <Button
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg"
+                size="lg"
+              >
                 <Home className="w-4 h-4 mr-2" />
                 Ana Sayfa
               </Button>
             </Link>
             <Link href="/search" className="flex-1">
-              <Button variant="outline" className="w-full border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700" size="lg">
+              <Button
+                variant="outline"
+                className="w-full border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+                size="lg"
+              >
                 <Search className="w-4 h-4 mr-2" />
                 Ürün Ara
               </Button>
@@ -77,4 +84,4 @@ export default function NotFound() {
       </Card>
     </div>
   )
-} 
+}

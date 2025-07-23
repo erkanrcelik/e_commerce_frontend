@@ -1,14 +1,18 @@
 'use client'
 
+
+
 import {
   ArrowRight,
   Calendar,
   Filter,
   Search,
+  Store,
   Tag,
   TrendingUp,
-  Users
+  Zap,
 } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 
@@ -16,7 +20,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import type { Campaign } from '@/types/campaign'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import type { Campaign } from '@/types/customer-campaign'
 
 /**
  * Campaigns Page Props
@@ -28,16 +33,16 @@ interface CampaignsPageProps {
 
 /**
  * Campaigns Page Component
- * 
+ *
  * Displays all campaigns with filtering and search functionality.
- * 
+ *
  * Features:
  * - Campaign grid layout
+ * - Tabbed filtering (All, Platform, Seller)
  * - Search functionality
- * - Campaign filtering
  * - Campaign statistics
  * - Responsive design
- * 
+ *
  * @example
  * ```tsx
  * <CampaignsPage campaigns={campaigns} />
@@ -45,25 +50,30 @@ interface CampaignsPageProps {
  */
 export function CampaignsPage({ campaigns }: CampaignsPageProps) {
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [activeTab, setActiveTab] = useState('all')
 
-  // Filter campaigns based on search and category
+  // Filter campaigns based on search and tab
   const filteredCampaigns = campaigns.filter(campaign => {
-    const matchesSearch = campaign.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         campaign.description.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = selectedCategory === 'all' || campaign.type === selectedCategory
-    
-    return matchesSearch && matchesCategory
-  })
+    const matchesSearch =
+      campaign.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      campaign.description.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesTab = activeTab === 'all' || campaign.type === activeTab
 
-  // Get unique categories
-  const categories = ['all', ...Array.from(new Set(campaigns.map(c => c.type)))]
+    return matchesSearch && matchesTab
+  })
 
   // Calculate statistics
   const totalCampaigns = campaigns.length
-  const activeCampaigns = campaigns.filter(c => c.isActive || c.status === 'active').length
-  const totalDiscount = campaigns.reduce((sum, c) => sum + (c.discountPercentage || c.discountValue), 0)
-  const avgDiscount = totalCampaigns > 0 ? Math.round(totalDiscount / totalCampaigns) : 0
+  const activeCampaigns = campaigns.filter(c => c.isActive).length
+  const platformCampaigns = campaigns.filter(c => c.type === 'platform').length
+  const sellerCampaigns = campaigns.filter(c => c.type === 'seller').length
+  const avgDiscount =
+    totalCampaigns > 0
+      ? Math.round(
+          campaigns.reduce((sum, c) => sum + c.discountValue, 0) /
+            totalCampaigns
+        )
+      : 0
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -88,7 +98,7 @@ export function CampaignsPage({ campaigns }: CampaignsPageProps) {
               Total Campaigns
             </div>
           </Card>
-          
+
           <Card className="p-6 text-center">
             <div className="text-2xl font-bold text-green-600 dark:text-green-400">
               {activeCampaigns}
@@ -97,7 +107,7 @@ export function CampaignsPage({ campaigns }: CampaignsPageProps) {
               Active Campaigns
             </div>
           </Card>
-          
+
           <Card className="p-6 text-center">
             <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
               %{avgDiscount}
@@ -106,13 +116,13 @@ export function CampaignsPage({ campaigns }: CampaignsPageProps) {
               Average Discount
             </div>
           </Card>
-          
+
           <Card className="p-6 text-center">
             <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-              {campaigns.reduce((sum, c) => sum + (c.productCount || 0), 0)}
+              {platformCampaigns + sellerCampaigns}
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              Total Products
+              Platform + Seller
             </div>
           </Card>
         </div>
@@ -126,144 +136,154 @@ export function CampaignsPage({ campaigns }: CampaignsPageProps) {
               <Input
                 placeholder="Search campaigns..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 className="pl-10"
               />
             </div>
-            
-            {/* Category Filter */}
-            <div className="flex items-center space-x-2">
-              <Filter className="w-5 h-5 text-gray-400" />
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              >
-                {categories.map(category => (
-                  <option key={category} value={category}>
-                    {category === 'all' ? 'All Categories' : category}
-                  </option>
-                ))}
-              </select>
-            </div>
           </div>
         </div>
 
-        {/* Campaigns Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCampaigns.map(campaign => (
-            <Link key={campaign.id} href={`/campaigns/${campaign.slug}`}>
-              <Card className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
-                {/* Campaign Image */}
-                <div className="aspect-video bg-gradient-to-br from-purple-500 to-blue-600 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-black/20" />
-                  <div className="absolute top-4 left-4">
-                    <Badge className="bg-red-500 text-white">
-                      {campaign.discountPercentage || campaign.discountValue}% Off
-                    </Badge>
-                  </div>
-                  <div className="absolute bottom-4 right-4">
-                    <Badge variant="secondary" className="bg-white/90 text-gray-900">
-                      {campaign.productCount || 0} products
-                    </Badge>
-                  </div>
-                </div>
+        {/* Tabs for Campaign Types */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="all" className="flex items-center gap-2">
+              <Filter className="w-4 h-4" />
+              All ({totalCampaigns})
+            </TabsTrigger>
+            <TabsTrigger value="platform" className="flex items-center gap-2">
+              <Zap className="w-4 h-4" />
+              Platform ({platformCampaigns})
+            </TabsTrigger>
+            <TabsTrigger value="seller" className="flex items-center gap-2">
+              <Store className="w-4 h-4" />
+              Seller ({sellerCampaigns})
+            </TabsTrigger>
+          </TabsList>
 
-                {/* Campaign Info */}
-                <div className="p-6 space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                      {campaign.title}
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
-                      {campaign.description}
-                    </p>
-                  </div>
+          <TabsContent value="all" className="mt-6">
+            <CampaignsGrid campaigns={filteredCampaigns} />
+          </TabsContent>
 
-                  {/* Campaign Details */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center space-x-1 text-gray-600 dark:text-gray-400">
-                        <Calendar className="w-4 h-4" />
-                        <span>Ends: {new Date(campaign.endDate).toLocaleDateString('en-US')}</span>
-                      </div>
-                      <div className="flex items-center space-x-1 text-gray-600 dark:text-gray-400">
-                        <Users className="w-4 h-4" />
-                        <span>{campaign.participantCount || campaign.usedCount} participants</span>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center space-x-1 text-gray-600 dark:text-gray-400">
-                        <Tag className="w-4 h-4" />
-                        <span>{campaign.category}</span>
-                      </div>
-                      <div className="flex items-center space-x-1 text-gray-600 dark:text-gray-400">
-                        <TrendingUp className="w-4 h-4" />
-                        <span>{campaign.isActive ? 'Active' : 'Inactive'}</span>
-                      </div>
-                    </div>
-                  </div>
+          <TabsContent value="platform" className="mt-6">
+            <CampaignsGrid campaigns={filteredCampaigns} />
+          </TabsContent>
 
-                  {/* Campaign Progress */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600 dark:text-gray-400">Progress</span>
-                      <span className="text-gray-900 dark:text-white font-medium">
-                        {campaign.currentSales && campaign.targetSales
-                          ? Math.round((campaign.currentSales / campaign.targetSales) * 100)
-                          : 0}%
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                      <div
-                        className="bg-gradient-to-r from-purple-500 to-blue-600 h-2 rounded-full transition-all duration-300"
-                        style={{
-                          width: `${
-                            campaign.currentSales && campaign.targetSales
-                              ? Math.min((campaign.currentSales / campaign.targetSales) * 100, 100)
-                              : 0
-                          }%`
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Action Button */}
-                  <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white">
-                    View Campaign
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </div>
-              </Card>
-            </Link>
-          ))}
-        </div>
-
-        {/* Empty State */}
-        {filteredCampaigns.length === 0 && (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-4 flex items-center justify-center">
-              <Search className="w-8 h-8 text-gray-400" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              No Campaigns Found
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              No campaigns match your search criteria.
-            </p>
-            <Button 
-              variant="outline"
-              onClick={() => {
-                setSearchQuery('')
-                setSelectedCategory('all')
-              }}
-            >
-              Clear Filters
-            </Button>
-          </div>
-        )}
+          <TabsContent value="seller" className="mt-6">
+            <CampaignsGrid campaigns={filteredCampaigns} />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   )
-} 
+}
+
+/**
+ * Campaigns Grid Component
+ */
+function CampaignsGrid({ campaigns }: { campaigns: Campaign[] }) {
+  if (campaigns.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-4 flex items-center justify-center">
+          <Search className="w-8 h-8 text-gray-400" />
+        </div>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+          No Campaigns Found
+        </h3>
+        <p className="text-gray-600 dark:text-gray-400 mb-4">
+          No campaigns match your search criteria.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {campaigns.map(campaign => (
+        <Link key={campaign._id} href={`/campaigns/${campaign._id}`}>
+          <Card className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
+            {/* Campaign Image */}
+            <div className="aspect-video relative overflow-hidden">
+              {campaign.imageUrl ? (
+                <Image
+                  src={campaign.imageUrl}
+                  alt={campaign.name}
+                  width={300}
+                  height={200}
+                  className="w-full h-48 object-cover rounded-t-lg"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-purple-500 to-blue-600" />
+              )}
+              <div className="absolute inset-0 bg-black/20" />
+              <div className="absolute top-4 left-4">
+                <Badge className="bg-red-500 text-white">
+                  {campaign.discountType === 'percentage'
+                    ? `${campaign.discountValue}% OFF`
+                    : `$${campaign.discountValue} OFF`}
+                </Badge>
+              </div>
+              <div className="absolute bottom-4 right-4">
+                <Badge
+                  variant="secondary"
+                  className="bg-white/90 text-gray-900"
+                >
+                  {campaign.type === 'platform' ? 'Platform' : 'Seller'}
+                </Badge>
+              </div>
+            </div>
+
+            {/* Campaign Info */}
+            <div className="p-6 space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                  {campaign.name}
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
+                  {campaign.description}
+                </p>
+              </div>
+
+              {/* Campaign Details */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center space-x-1 text-gray-600 dark:text-gray-400">
+                    <Calendar className="w-4 h-4" />
+                    <span>
+                      Ends:{' '}
+                      {new Date(campaign.endDate).toLocaleDateString('en-US')}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-1 text-gray-600 dark:text-gray-400">
+                    <TrendingUp className="w-4 h-4" />
+                    <span>{campaign.remainingDays} days left</span>
+                  </div>
+                </div>
+
+                {campaign.seller && (
+                  <div className="flex items-center space-x-1 text-sm text-gray-600 dark:text-gray-400">
+                    <Store className="w-4 h-4" />
+                    <span>{campaign.seller.storeName}</span>
+                  </div>
+                )}
+
+                {campaign.minOrderAmount && (
+                  <div className="flex items-center space-x-1 text-sm text-gray-600 dark:text-gray-400">
+                    <Tag className="w-4 h-4" />
+                    <span>Min. Order: ${campaign.minOrderAmount}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Button */}
+              <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white">
+                View Campaign
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </div>
+          </Card>
+        </Link>
+      ))}
+    </div>
+  )
+}

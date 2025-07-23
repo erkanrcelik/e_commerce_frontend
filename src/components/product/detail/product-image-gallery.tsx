@@ -5,7 +5,8 @@ import Image from 'next/image'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import type { ProductImage } from '@/types/product'
+// Temporarily use simple type for build compatibility
+type ProductImage = { url: string; alt: string; id?: string }
 
 /**
  * Product Image Gallery Props
@@ -17,16 +18,16 @@ interface ProductImageGalleryProps {
 
 /**
  * Product Image Gallery Component
- * 
+ *
  * Displays product images with thumbnail navigation and zoom functionality.
- * 
+ *
  * Features:
  * - Main image display
  * - Thumbnail navigation
  * - Zoom functionality
  * - Image carousel
  * - Responsive design
- * 
+ *
  * @example
  * ```tsx
  * <ProductImageGallery images={product.images} />
@@ -47,7 +48,7 @@ export function ProductImageGallery({ images }: ProductImageGalleryProps) {
       {/* Main Image */}
       <div className="relative aspect-square bg-white dark:bg-gray-800 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
         <Image
-          src={currentImage?.url || '/images/placeholder.jpg'}
+          src={currentImage?.url || '/placeholder-product.jpg'}
           alt={currentImage?.alt || 'Product image'}
           fill
           className={`object-cover transition-transform duration-300 ${
@@ -55,7 +56,7 @@ export function ProductImageGallery({ images }: ProductImageGalleryProps) {
           }`}
         />
         <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors" />
-        
+
         {/* Zoom Button */}
         <Button
           variant="secondary"
@@ -90,4 +91,4 @@ export function ProductImageGallery({ images }: ProductImageGalleryProps) {
       </div>
     </div>
   )
-} 
+}

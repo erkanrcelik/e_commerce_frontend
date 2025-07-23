@@ -1,11 +1,11 @@
-import { VerifyEmailForm } from '@/components/auth/verify-email-form';
+import { VerifyEmailForm } from '@/components/auth/verify-email-form'
 
 /**
  * Email verification page component
  * Renders the email verification form with token
  */
 export default function VerifyEmailPage() {
-  return <VerifyEmailForm />;
+  return <VerifyEmailForm />
 }
 
 /**
@@ -14,4 +14,4 @@ export default function VerifyEmailPage() {
 export const metadata = {
   title: 'Verify Email',
   description: 'Verify your email address to complete your registration.',
-}; 
+}

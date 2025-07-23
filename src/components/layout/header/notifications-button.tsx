@@ -7,10 +7,10 @@ import { Button } from '@/components/ui/button'
 
 /**
  * Notifications Button Component
- * 
+ *
  * Displays notification bell icon with unread count badge.
  * Provides access to user notifications when clicked.
- * 
+ *
  * @example
  * ```tsx
  * <NotificationsButton />
@@ -25,12 +25,11 @@ export function NotificationsButton() {
    */
   const handleNotificationClick = () => {
     // TODO: Implement notification panel or navigation
-    // console.log('Notifications clicked')
   }
 
   return (
-    <Button 
-      variant="ghost" 
+    <Button
+      variant="ghost"
       className="relative h-10 w-10 rounded-xl hover:bg-purple-50 dark:hover:bg-purple-950/30"
       onClick={handleNotificationClick}
       aria-label={`Notifications ${notificationCount > 0 ? `(${notificationCount} unread)` : ''}`}
@@ -43,4 +42,4 @@ export function NotificationsButton() {
       )}
     </Button>
   )
-} 
+}

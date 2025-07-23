@@ -4,16 +4,16 @@ import { ArrowUp } from 'lucide-react'
 
 /**
  * Back to Top Button Component
- * 
+ *
  * Provides smooth scroll to top functionality.
  * Helps users quickly return to page top from footer.
- * 
+ *
  * Features:
  * - Smooth scroll animation
  * - Accessible button
  * - Hover effects
  * - Full-width design
- * 
+ *
  * @example
  * ```tsx
  * <BackToTop />
@@ -26,9 +26,9 @@ export function BackToTop() {
    */
   const handleScrollToTop = () => {
     if (typeof window !== 'undefined') {
-      window.scrollTo({ 
-        top: 0, 
-        behavior: 'smooth' 
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
       })
     }
   }
@@ -47,4 +47,4 @@ export function BackToTop() {
       </div>
     </div>
   )
-} 
+}

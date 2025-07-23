@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/card'
 
 /**
  * Global Error Page (Root Level)
- * 
+ *
  * Handles root-level errors that occur outside of the app directory.
  * Provides a clean, modern error interface.
  */
@@ -38,14 +38,15 @@ export default function GlobalError({
                   <span className="text-xs text-white font-bold">!</span>
                 </div>
               </div>
-              
+
               {/* Error Content */}
               <div className="space-y-3">
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                   Kritik Hata
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-                  Uygulama başlatılırken bir hata oluştu. Lütfen sayfayı yenileyin.
+                  Uygulama başlatılırken bir hata oluştu. Lütfen sayfayı
+                  yenileyin.
                 </p>
               </div>
 
@@ -60,7 +61,7 @@ export default function GlobalError({
                   Sayfayı Yenile
                 </Button>
                 <Button
-                  onClick={() => window.location.href = '/'}
+                  onClick={() => (window.location.href = '/')}
                   variant="outline"
                   className="flex-1 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
                   size="lg"
@@ -75,4 +76,4 @@ export default function GlobalError({
       </body>
     </html>
   )
-} 
+}

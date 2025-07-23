@@ -1,188 +1,320 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 
-import type { CartItem, CartState } from '@/types/cart'
-
-/**
- * Mock cart items for demonstration
- */
-const mockCartItems: CartItem[] = [
-  {
-    id: '1',
-    productId: 'prod-1',
-    name: 'Nike Air Max 270',
-    price: 1299.99,
-    quantity: 1,
-    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop',
-    variant: {
-      size: '42',
-      color: 'Siyah',
-    },
-    maxQuantity: 10,
-  },
-  {
-    id: '2',
-    productId: 'prod-2',
-    name: 'Adidas Ultraboost 22',
-    price: 1899.99,
-    quantity: 2,
-    image: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400&h=400&fit=crop',
-    variant: {
-      size: '41',
-      color: 'Beyaz',
-    },
-    maxQuantity: 8,
-  },
-  {
-    id: '3',
-    productId: 'prod-3',
-    name: 'Puma RS-X',
-    price: 899.99,
-    quantity: 1,
-    image: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=400&h=400&fit=crop',
-    variant: {
-      size: '43',
-      color: 'Mavi',
-    },
-    maxQuantity: 5,
-  },
-]
+import { CustomerCartService } from '@/services/customer-cart.service'
+import type { CartItem, CartResponse } from '@/types/customer-cart'
 
 /**
- * Calculate initial totals
+ * Cart state interface
  */
-const calculateInitialTotals = (items: CartItem[]) => {
-  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  const shipping = subtotal >= 50 ? 0 : 5.99
-  const tax = subtotal * 0.085
-  const total = subtotal + shipping + tax
-  return { subtotal, shipping, tax, total }
+export interface CartState {
+  items: CartItem[]
+  total: number
+  subtotal: number
+  totalDiscount: number
+  shipping: number
+  tax: number
+  discount: number
+  appliedCampaigns: any[]
+  isLoading: boolean
+  error: string | null
 }
-
-const initialTotals = calculateInitialTotals(mockCartItems)
 
 /**
  * Initial cart state
  */
 const initialState: CartState = {
-  items: mockCartItems,
-  total: initialTotals.total,
-  subtotal: initialTotals.subtotal,
-  shipping: initialTotals.shipping,
-  tax: initialTotals.tax,
+  items: [],
+  total: 0,
+  subtotal: 0,
+  totalDiscount: 0,
+  shipping: 0,
+  tax: 0,
   discount: 0,
-  discountCode: undefined,
+  appliedCampaigns: [],
+  isLoading: false,
+  error: null,
 }
 
 /**
- * Cart slice for Redux state management
+ * Async thunk to fetch cart from API
  */
-const cartSlice = createSlice({
+export const fetchCart = createAsyncThunk(
+  'cart/fetchCart',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await CustomerCartService.getCart()
+      return response
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to fetch cart'
+      )
+    }
+  }
+)
+
+/**
+ * Async thunk to add item to cart
+ */
+export const addItemToCart = createAsyncThunk(
+  'cart/addItemToCart',
+  async (
+    { productId, quantity }: { productId: string; quantity: number },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await CustomerCartService.addToCart(productId, quantity)
+      return response
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to add item to cart'
+      )
+    }
+  }
+)
+
+/**
+ * Async thunk to update cart item quantity
+ */
+export const updateCartItemQuantity = createAsyncThunk(
+  'cart/updateCartItemQuantity',
+  async (
+    { productId, quantity }: { productId: string; quantity: number },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await CustomerCartService.updateCartItem(
+        productId,
+        quantity
+      )
+      return response
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to update cart item'
+      )
+    }
+  }
+)
+
+/**
+ * Async thunk to remove item from cart
+ */
+export const removeItemFromCart = createAsyncThunk(
+  'cart/removeItemFromCart',
+  async (productId: string, { rejectWithValue }) => {
+    try {
+      const response = await CustomerCartService.removeFromCart(productId)
+      return response
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to remove item from cart'
+      )
+    }
+  }
+)
+
+/**
+ * Async thunk to clear cart
+ */
+export const clearCartAsync = createAsyncThunk(
+  'cart/clearCartAsync',
+  async (_, { rejectWithValue }) => {
+    try {
+      await CustomerCartService.clearCart()
+      return { message: 'Cart cleared successfully' }
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to clear cart'
+      )
+    }
+  }
+)
+
+/**
+ * Cart slice with Redux Toolkit
+ * Handles cart state management including API operations
+ */
+export const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
     /**
-     * Add item to cart
+     * Set loading state
      */
-    addToCart: (state, action: PayloadAction<CartItem>) => {
-      const existingItem = state.items.find(
-        item => item.id === action.payload.id
-      )
-
-      if (existingItem) {
-        existingItem.quantity += action.payload.quantity
-      } else {
-        state.items.push(action.payload)
-      }
-
-      // Recalculate totals
-      cartSlice.caseReducers.calculateTotals(state)
+    setLoading: (state, action: PayloadAction<boolean>) => {
+      state.isLoading = action.payload
     },
 
     /**
-     * Remove item from cart
+     * Set error state
      */
-    removeFromCart: (state, action: PayloadAction<string>) => {
-      state.items = state.items.filter(item => item.id !== action.payload)
-      cartSlice.caseReducers.calculateTotals(state)
+    setError: (state, action: PayloadAction<string | null>) => {
+      state.error = action.payload
     },
 
     /**
-     * Update item quantity
+     * Clear error state
      */
-    updateQuantity: (
-      state,
-      action: PayloadAction<{ id: string; quantity: number }>
-    ) => {
-      const item = state.items.find(item => item.id === action.payload.id)
-      if (item) {
-        item.quantity = Math.max(1, action.payload.quantity)
-        cartSlice.caseReducers.calculateTotals(state)
-      }
+    clearError: state => {
+      state.error = null
     },
 
     /**
-     * Clear cart
-     */
-    clearCart: state => {
-      state.items = []
-      state.total = 0
-      state.subtotal = 0
-      state.shipping = 0
-      state.tax = 0
-      state.discount = 0
-      state.discountCode = undefined
-    },
-
-    /**
-     * Calculate cart totals
+     * Calculate cart totals including shipping, tax, and discounts
      */
     calculateTotals: state => {
+      // Calculate subtotal
       state.subtotal = state.items.reduce(
         (sum, item) => sum + item.price * item.quantity,
         0
       )
-      
-      // Shipping calculation (free shipping over $50)
-      state.shipping = state.subtotal >= 50 ? 0 : 5.99
-      
-      // Tax calculation (8.5%)
+
+      // Calculate shipping (free if subtotal > 150)
+      state.shipping = state.subtotal >= 150 ? 0 : 15
+
+      // Calculate tax (8.5%)
       state.tax = state.subtotal * 0.085
-      
-      // Total calculation
+
+      // Calculate discount (from totalDiscount)
+      state.discount = state.totalDiscount
+
+      // Calculate total
       state.total = state.subtotal + state.shipping + state.tax - state.discount
     },
+  },
+  extraReducers: builder => {
+    // Fetch cart
+    builder
+      .addCase(fetchCart.pending, state => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(
+        fetchCart.fulfilled,
+        (state, action: PayloadAction<CartResponse>) => {
+          state.isLoading = false
+          state.items = action.payload.items
+          state.total = action.payload.total
+          state.subtotal = action.payload.subtotal
+          state.totalDiscount = action.payload.totalDiscount
+          state.appliedCampaigns = action.payload.appliedCampaigns
 
-    /**
-     * Apply discount code
-     */
-    applyDiscount: (
-      state,
-      action: PayloadAction<{ code: string; amount: number }>
-    ) => {
-      state.discountCode = action.payload.code
-      state.discount = action.payload.amount
-      cartSlice.caseReducers.calculateTotals(state)
-    },
+          // Calculate additional totals
+          state.shipping = state.subtotal >= 150 ? 0 : 15
+          state.tax = state.subtotal * 0.085
+          state.discount = state.totalDiscount
+        }
+      )
+      .addCase(fetchCart.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload as string
+      })
 
-    /**
-     * Remove discount
-     */
-    removeDiscount: state => {
-      state.discountCode = undefined
-      state.discount = 0
-      cartSlice.caseReducers.calculateTotals(state)
-    },
+    // Add item to cart
+    builder
+      .addCase(addItemToCart.pending, state => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(
+        addItemToCart.fulfilled,
+        (state, action: PayloadAction<CartResponse>) => {
+          state.isLoading = false
+          state.items = action.payload.items
+          state.total = action.payload.total
+          state.subtotal = action.payload.subtotal
+          state.totalDiscount = action.payload.totalDiscount
+          state.appliedCampaigns = action.payload.appliedCampaigns
+
+          // Calculate additional totals
+          state.shipping = state.subtotal >= 150 ? 0 : 15
+          state.tax = state.subtotal * 0.085
+          state.discount = state.totalDiscount
+        }
+      )
+      .addCase(addItemToCart.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload as string
+      })
+
+    // Update cart item quantity
+    builder
+      .addCase(updateCartItemQuantity.pending, state => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(
+        updateCartItemQuantity.fulfilled,
+        (state, action: PayloadAction<CartResponse>) => {
+          state.isLoading = false
+          state.items = action.payload.items
+          state.total = action.payload.total
+          state.subtotal = action.payload.subtotal
+          state.totalDiscount = action.payload.totalDiscount
+          state.appliedCampaigns = action.payload.appliedCampaigns
+
+          // Calculate additional totals
+          state.shipping = state.subtotal >= 150 ? 0 : 15
+          state.tax = state.subtotal * 0.085
+          state.discount = state.totalDiscount
+        }
+      )
+      .addCase(updateCartItemQuantity.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload as string
+      })
+
+    // Remove item from cart
+    builder
+      .addCase(removeItemFromCart.pending, state => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(
+        removeItemFromCart.fulfilled,
+        (state, action: PayloadAction<CartResponse>) => {
+          state.isLoading = false
+          state.items = action.payload.items
+          state.total = action.payload.total
+          state.subtotal = action.payload.subtotal
+          state.totalDiscount = action.payload.totalDiscount
+          state.appliedCampaigns = action.payload.appliedCampaigns
+
+          // Calculate additional totals
+          state.shipping = state.subtotal >= 150 ? 0 : 15
+          state.tax = state.subtotal * 0.085
+          state.discount = state.totalDiscount
+        }
+      )
+      .addCase(removeItemFromCart.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload as string
+      })
+
+    // Clear cart
+    builder
+      .addCase(clearCartAsync.pending, state => {
+        state.isLoading = true
+        state.error = null
+      })
+      .addCase(clearCartAsync.fulfilled, state => {
+        state.isLoading = false
+        state.items = []
+        state.total = 0
+        state.subtotal = 0
+        state.totalDiscount = 0
+        state.shipping = 0
+        state.tax = 0
+        state.discount = 0
+        state.appliedCampaigns = []
+      })
+      .addCase(clearCartAsync.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload as string
+      })
   },
 })
 
-export const {
-  addToCart,
-  removeFromCart,
-  updateQuantity,
-  clearCart,
-  calculateTotals,
-  applyDiscount,
-  removeDiscount,
-} = cartSlice.actions
+export const { setLoading, setError, clearError, calculateTotals } =
+  cartSlice.actions
 
-export default cartSlice.reducer 
+export default cartSlice.reducer

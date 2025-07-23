@@ -15,10 +15,10 @@ import {
 
 /**
  * Mobile Search Button Component
- * 
+ *
  * Provides mobile search functionality with a slide-out sheet interface.
  * Opens a search sheet when clicked on mobile devices.
- * 
+ *
  * @example
  * ```tsx
  * <MobileSearchButton />
@@ -35,16 +35,15 @@ export function MobileSearchButton() {
     e.preventDefault()
     if (searchQuery.trim()) {
       // TODO: Implement search navigation
-      // console.log('Searching for:', searchQuery)
     }
   }
 
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <Button
+          variant="ghost"
+          size="sm"
           className="h-10 w-10 rounded-xl"
           aria-label="Open search"
         >
@@ -55,7 +54,7 @@ export function MobileSearchButton() {
         <SheetHeader className="mb-6">
           <SheetTitle>Search Products</SheetTitle>
         </SheetHeader>
-        
+
         <div className="space-y-6">
           <form onSubmit={handleSearch}>
             <div className="relative">
@@ -63,11 +62,11 @@ export function MobileSearchButton() {
                 type="text"
                 placeholder="Search for anything..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
                 className="h-12 text-lg pr-16"
                 autoFocus
               />
-              <Button 
+              <Button
                 type="submit"
                 className="absolute right-2 top-2 h-8 px-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
                 size="sm"
@@ -76,12 +75,14 @@ export function MobileSearchButton() {
               </Button>
             </div>
           </form>
-          
+
           {/* Popular Searches */}
           <div className="space-y-3">
-            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Popular Searches</h4>
+            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Popular Searches
+            </h4>
             <div className="flex flex-wrap gap-2">
-              {['Headphones', 'Smart Watch', 'Laptop', 'Phone'].map((term) => (
+              {['Headphones', 'Smart Watch', 'Laptop', 'Phone'].map(term => (
                 <Button
                   key={term}
                   variant="outline"
@@ -98,4 +99,4 @@ export function MobileSearchButton() {
       </SheetContent>
     </Sheet>
   )
-} 
+}

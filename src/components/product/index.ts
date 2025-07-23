@@ -1,7 +1,7 @@
 // Listing components
 export * from './listing'
 
-// Detail components  
+// Detail components
 export * from './detail'
 
 // Shared components

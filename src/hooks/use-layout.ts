@@ -6,28 +6,30 @@ import { useMemo } from 'react'
 import {
   LAYOUT_CONFIGS,
   getLayoutConfigByRoute,
-  type LayoutConfig
+  type LayoutConfig,
 } from '@/types/layout'
 
 /**
  * Custom hook for managing layout configuration
- * 
+ *
  * Automatically determines layout config based on current route,
  * with support for manual overrides.
- * 
+ *
  * @param overrideConfig - Manual layout configuration to override automatic detection
  * @returns Current layout configuration
- * 
+ *
  * @example
  * ```tsx
  * // Automatic layout detection
  * const layout = useLayout()
- * 
+ *
  * // Manual override
  * const layout = useLayout({ showHeader: false })
  * ```
  */
-export function useLayout(overrideConfig?: Partial<LayoutConfig>): LayoutConfig {
+export function useLayout(
+  overrideConfig?: Partial<LayoutConfig>
+): LayoutConfig {
   const pathname = usePathname()
 
   const layoutConfig = useMemo(() => {
@@ -47,14 +49,14 @@ export function useLayout(overrideConfig?: Partial<LayoutConfig>): LayoutConfig 
 
 /**
  * Hook for checking if current route should show specific layout elements
- * 
+ *
  * @param overrideConfig - Manual layout configuration
  * @returns Layout visibility flags
- * 
+ *
  * @example
  * ```tsx
  * const { showHeader, showFooter } = useLayoutVisibility()
- * 
+ *
  * return (
  *   <>
  *     {showHeader && <Header />}
@@ -79,7 +81,7 @@ export function useLayoutVisibility(overrideConfig?: Partial<LayoutConfig>) {
 
 /**
  * Hook for debugging layout configuration
- * 
+ *
  * @returns Current route and layout info
  */
 export function useLayoutDebug() {
@@ -93,4 +95,4 @@ export function useLayoutDebug() {
     config,
     availableConfigs: Object.keys(LAYOUT_CONFIGS),
   }
-} 
+}

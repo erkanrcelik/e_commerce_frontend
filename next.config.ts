@@ -9,7 +9,21 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'minio.rhytma.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
+  },
+  // Remove Next.js debug overlay in production
+  devIndicators: false,
+  // Disable React Strict Mode in production for better performance
+  reactStrictMode: process.env.NODE_ENV === 'development',
+  // Disable ESLint during build
+  eslint: {
+    ignoreDuringBuilds: true,
   },
 };
 

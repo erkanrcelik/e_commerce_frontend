@@ -1,23 +1,26 @@
 import type { Metadata } from 'next'
+import { notFound, redirect } from 'next/navigation'
 
 import { ProductListingLayout } from '@/components/product/listing'
-import { getProducts } from '@/services/product.service'
+import { CustomerProductService } from '@/services/customer-product.service'
 
 export const metadata: Metadata = {
-  title: 'Product Search - playableFactory',
-  description: 'Find and compare the products you are looking for.',
+  title: 'Search - playableFactory',
+  description: 'Find products, categories, sellers, and campaigns.',
 }
 
 /**
  * Search Page
- * 
- * Global search page with product listing.
- * 
+ *
+ * Global search page that displays product results using unified products API.
+ * Redirects to all products page when search query is empty.
+ *
  * Features:
- * - Search functionality
- * - Advanced filtering and sorting
- * - Pagination
- * - Search results display
+ * - Unified products API integration
+ * - Advanced search functionality
+ * - Filter and sort capabilities
+ * - Responsive design
+ * - Redirect to all products when no search query
  */
 export default async function SearchPage({
   searchParams,
@@ -26,20 +29,53 @@ export default async function SearchPage({
 }) {
   const resolvedSearchParams = await searchParams
   const searchQuery = resolvedSearchParams.q || ''
-  
-  const productsResponse = await getProducts({
-    search: searchQuery,
-    page: 1,
-    limit: 12
-  })
+
+  // If search query is empty or only whitespace, redirect to all products page
+  if (!searchQuery.trim()) {
+    redirect('/products')
+  }
+
+  let productsResponse = null
+  let filterData = null
+
+  try {
+    // Get product search results using the unified products API
+    productsResponse = await CustomerProductService.searchProducts(
+      searchQuery,
+      {
+        page: 1,
+        limit: 20,
+        sortBy: 'createdAt',
+        sortOrder: 'desc',
+      }
+    )
+
+    // Fetch filter data
+    try {
+      filterData = await CustomerProductService.getProductFilters()
+    } catch (error) {
+      console.error('  Failed to fetch filter data:', error)
+      filterData = null
+    }
+  } catch (error) {
+    console.error('Failed to fetch search results:', error)
+    notFound()
+  }
 
   return (
-    <ProductListingLayout
-      initialProducts={productsResponse.products}
-      title={searchQuery ? `Search results for "${searchQuery}"` : 'Product Search'}
-      description={searchQuery ? `Products related to "${searchQuery}"` : 'Find and compare the products you are looking for'}
-      showCampaigns={true}
-      initialSearchQuery={searchQuery}
-    />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="bg-white dark:bg-gray-800">
+        <ProductListingLayout
+          initialProducts={productsResponse?.data || []}
+          title={`Search Results for "${searchQuery}"`}
+          description={`Found ${productsResponse?.total || 0} products matching "${searchQuery}"`}
+          showCampaigns={true}
+          totalProducts={productsResponse?.total || 0}
+          totalPages={productsResponse?.totalPages || 1}
+          filterData={filterData}
+          initialSearchQuery={searchQuery}
+        />
+      </div>
+    </div>
   )
-} 
+}

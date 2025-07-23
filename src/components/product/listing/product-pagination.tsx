@@ -20,15 +20,15 @@ interface ProductPaginationProps {
 
 /**
  * Product Pagination Component
- * 
+ *
  * Pagination controls for product listing.
- * 
+ *
  * Features:
  * - Previous/Next buttons
  * - Page number buttons
  * - Ellipsis for large page counts
  * - Responsive design
- * 
+ *
  * @example
  * ```tsx
  * <ProductPagination
@@ -42,7 +42,7 @@ export function ProductPagination({
   currentPage,
   totalPages,
   onPageChange,
-  className
+  className,
 }: ProductPaginationProps) {
   if (totalPages <= 1) return null
 
@@ -51,7 +51,11 @@ export function ProductPagination({
     const range = []
     const rangeWithDots = []
 
-    for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
+    for (
+      let i = Math.max(2, currentPage - delta);
+      i <= Math.min(totalPages - 1, currentPage + delta);
+      i++
+    ) {
       range.push(i)
     }
 
@@ -75,7 +79,9 @@ export function ProductPagination({
   const visiblePages = getVisiblePages()
 
   return (
-    <div className={`flex items-center justify-center gap-2 ${className || ''}`}>
+    <div
+      className={`flex items-center justify-center gap-2 ${className || ''}`}
+    >
       {/* Previous Button */}
       <Button
         variant="outline"
@@ -121,4 +127,4 @@ export function ProductPagination({
       </Button>
     </div>
   )
-} 
+}

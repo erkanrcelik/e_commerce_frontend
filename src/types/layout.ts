@@ -51,7 +51,8 @@ export const LAYOUT_CONFIGS = {
     showTopBanner: false,
     showNavigation: false,
     fullWidth: true,
-    mainClassName: 'min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-900 dark:to-gray-800',
+    mainClassName:
+      'min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-900 dark:to-gray-800',
   } as LayoutConfig,
 
   /** Layout for minimal pages (checkout, payment) */
@@ -105,7 +106,9 @@ export const ROUTE_LAYOUT_MAP: Record<string, keyof typeof LAYOUT_CONFIGS> = {
  * @param pathname - Current route pathname
  * @returns Layout config key or 'DEFAULT'
  */
-export function getLayoutConfigByRoute(pathname: string): keyof typeof LAYOUT_CONFIGS {
+export function getLayoutConfigByRoute(
+  pathname: string
+): keyof typeof LAYOUT_CONFIGS {
   // Check exact matches first
   if (pathname in ROUTE_LAYOUT_MAP) {
     return ROUTE_LAYOUT_MAP[pathname]
@@ -119,4 +122,4 @@ export function getLayoutConfigByRoute(pathname: string): keyof typeof LAYOUT_CO
   }
 
   return 'DEFAULT'
-} 
+}

@@ -9,7 +9,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import type { SortOption } from '@/hooks/use-product-listing'
+/**
+ * Sort option interface
+ */
+interface SortOption {
+  field: string
+  order: 'asc' | 'desc'
+}
 
 /**
  * Product Sort Props
@@ -25,14 +31,14 @@ interface ProductSortProps {
 
 /**
  * Product Sort Component
- * 
+ *
  * Dropdown for sorting products by different criteria.
- * 
+ *
  * Features:
  * - Sort by price, name, rating, newest
  * - Ascending and descending order
  * - Visual indicators for current sort
- * 
+ *
  * @example
  * ```tsx
  * <ProductSort
@@ -41,19 +47,35 @@ interface ProductSortProps {
  * />
  * ```
  */
-export function ProductSort({
-  value,
-  onChange,
-  className
-}: ProductSortProps) {
+export function ProductSort({ value, onChange, className }: ProductSortProps) {
   const sortOptions = [
-    { field: 'createdAt' as const, order: 'desc' as const, label: 'Newest First' },
-    { field: 'createdAt' as const, order: 'asc' as const, label: 'Oldest First' },
-    { field: 'price' as const, order: 'asc' as const, label: 'Price: Low to High' },
-    { field: 'price' as const, order: 'desc' as const, label: 'Price: High to Low' },
+    {
+      field: 'createdAt' as const,
+      order: 'desc' as const,
+      label: 'Newest First',
+    },
+    {
+      field: 'createdAt' as const,
+      order: 'asc' as const,
+      label: 'Oldest First',
+    },
+    {
+      field: 'price' as const,
+      order: 'asc' as const,
+      label: 'Price: Low to High',
+    },
+    {
+      field: 'price' as const,
+      order: 'desc' as const,
+      label: 'Price: High to Low',
+    },
     { field: 'name' as const, order: 'asc' as const, label: 'Name: A to Z' },
     { field: 'name' as const, order: 'desc' as const, label: 'Name: Z to A' },
-    { field: 'rating' as const, order: 'desc' as const, label: 'Highest Rated' },
+    {
+      field: 'rating' as const,
+      order: 'desc' as const,
+      label: 'Highest Rated',
+    },
     { field: 'rating' as const, order: 'asc' as const, label: 'Lowest Rated' },
   ]
 
@@ -70,15 +92,18 @@ export function ProductSort({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
-        {sortOptions.map((option) => (
+        {sortOptions.map(option => (
           <DropdownMenuItem
             key={`${option.field}-${option.order}`}
-            onClick={() => onChange({ field: option.field, order: option.order })}
+            onClick={() =>
+              onChange({ field: option.field, order: option.order })
+            }
             className={`
               cursor-pointer
-              ${value.field === option.field && value.order === option.order
-                ? 'bg-purple-50 dark:bg-purple-950/20 text-purple-700 dark:text-purple-300'
-                : ''
+              ${
+                value.field === option.field && value.order === option.order
+                  ? 'bg-purple-50 dark:bg-purple-950/20 text-purple-700 dark:text-purple-300'
+                  : ''
               }
             `}
           >
@@ -88,4 +113,4 @@ export function ProductSort({
       </DropdownMenuContent>
     </DropdownMenu>
   )
-} 
+}

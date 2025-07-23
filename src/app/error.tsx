@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/card'
 
 /**
  * Global Error Page
- * 
+ *
  * Handles all application errors with a modern, clean design.
  * Provides retry and home navigation options.
  */
@@ -36,14 +36,15 @@ export default function Error({
               <span className="text-xs text-white font-bold">!</span>
             </div>
           </div>
-          
+
           {/* Error Content */}
           <div className="space-y-3">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               Bir Hata Oluştu
             </h1>
             <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-              Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin veya ana sayfaya dönün.
+              Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin veya ana
+              sayfaya dönün.
             </p>
           </div>
 
@@ -58,7 +59,7 @@ export default function Error({
               Tekrar Dene
             </Button>
             <Button
-              onClick={() => window.location.href = '/'}
+              onClick={() => (window.location.href = '/')}
               variant="outline"
               className="flex-1 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
               size="lg"
@@ -83,4 +84,4 @@ export default function Error({
       </Card>
     </div>
   )
-} 
+}

@@ -2,16 +2,17 @@
 
 import { Zap } from 'lucide-react'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { useLayoutVisibility } from '@/hooks/use-layout'
-import { mockCategories } from '@/lib/mock-data'
+import { CustomerCategoryService } from '@/services/customer-category.service'
+import type { Category } from '@/types/customer-category'
 
 // Import header sub-components
+import Image from 'next/image'
 import { ShoppingCartMenu } from './cart-menu'
 import { MobileMenu } from './mobile-menu'
 import { MobileSearchButton } from './mobile-search-button'
-import { NotificationsButton } from './notifications-button'
 import { SearchBar } from './search-bar'
 import { UserAccountMenu } from './user-menu'
 
@@ -28,27 +29,26 @@ interface HeaderProps {
 
 /**
  * Header Component
- * 
+ *
  * Main navigation header containing logo, search, user actions, and navigation.
  * Responsive design with mobile menu support and category navigation.
  * Features scroll-based navigation hiding for better UX.
- * 
+ *
  * Features:
  * - Logo and branding
  * - Search functionality with category filtering
  * - User authentication menu
  * - Shopping cart with item count
- * - Notifications
  * - Mobile-responsive navigation
  * - Category navigation bar
  * - Conditional top banner and navigation
- * - Scroll-based navigation hiding
- * 
+ * - Scroll-based navigation hiding with improved debounce
+ *
  * @example
  * ```tsx
  * // Default header (follows route-based config)
  * <Header />
- * 
+ *
  * // Override specific elements
  * <Header layoutOverride={{ showTopBanner: false }} />
  * ```
@@ -56,18 +56,71 @@ interface HeaderProps {
 export function Header({ layoutOverride }: HeaderProps = {}) {
   const { showTopBanner, showNavigation } = useLayoutVisibility(layoutOverride)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [categories, setCategories] = useState<Category[]>([])
 
   /**
-   * Handle scroll event to show/hide navigation
+   * Improved scroll handler with higher threshold and better debouncing
+   */
+  const handleScroll = useCallback(() => {
+    const scrollY = window.scrollY
+    // Increased threshold to prevent small scroll movements from triggering
+    const shouldBeScrolled = scrollY > 100
+
+    // Only update state if the value actually changed
+    setIsScrolled(prev => {
+      if (prev !== shouldBeScrolled) {
+        return shouldBeScrolled
+      }
+      return prev
+    })
+  }, [])
+
+  /**
+   * Handle scroll event with improved debounce to prevent excessive re-renders
    */
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY
-      setIsScrolled(scrollTop > 100) // Hide navigation after 100px scroll
+    let timeoutId: NodeJS.Timeout
+    let lastScrollY = window.scrollY
+
+    const debouncedScrollHandler = () => {
+      const currentScrollY = window.scrollY
+      const scrollDifference = Math.abs(currentScrollY - lastScrollY)
+
+      // Only trigger if scroll difference is significant (prevents micro-movements)
+      if (scrollDifference > 5) {
+        clearTimeout(timeoutId)
+        timeoutId = setTimeout(() => {
+          handleScroll()
+          lastScrollY = currentScrollY
+        }, 50) // Increased debounce time to 50ms
+      }
     }
 
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    window.addEventListener('scroll', debouncedScrollHandler, { passive: true })
+
+    return () => {
+      window.removeEventListener('scroll', debouncedScrollHandler)
+      clearTimeout(timeoutId)
+    }
+  }, [handleScroll])
+
+  /**
+   * Load categories on component mount
+   */
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const categoriesData = await CustomerCategoryService.getCategories({
+          limit: 10,
+        })
+        setCategories(categoriesData.data)
+      } catch (error) {
+        console.error('Load user data error:', error)
+        // Handle error
+      }
+    }
+
+    loadCategories()
   }, [])
 
   return (
@@ -78,7 +131,9 @@ export function Header({ layoutOverride }: HeaderProps = {}) {
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-center h-10 text-white text-sm">
               <Zap className="w-4 h-4 mr-2" />
-              <span className="font-medium">Free shipping on orders over $50 • 30-day returns</span>
+              <span className="font-medium">
+                Free shipping on orders over $50 • 30-day returns
+              </span>
             </div>
           </div>
         </div>
@@ -90,11 +145,20 @@ export function Header({ layoutOverride }: HeaderProps = {}) {
           {/* Left Section - Logo & Mobile Menu */}
           <div className="flex items-center gap-4">
             <MobileMenu />
-            
+
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-600 via-blue-600 to-purple-700 rounded-2xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-lg">P</span>
+            <Link
+              href="/"
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+            >
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-600 via-blue-600 to-purple-700 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden">
+                <Image
+                  src="/logo.svg"
+                  alt="playableFactory"
+                  width={40}
+                  height={40}
+                  className="w-full h-full object-contain"
+                />
               </div>
               <div className="hidden sm:block">
                 <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
@@ -119,11 +183,6 @@ export function Header({ layoutOverride }: HeaderProps = {}) {
               <MobileSearchButton />
             </div>
 
-            {/* Notifications */}
-            <div className="hidden md:block">
-              <NotificationsButton />
-            </div>
-
             {/* Shopping Cart */}
             <ShoppingCartMenu />
 
@@ -135,17 +194,32 @@ export function Header({ layoutOverride }: HeaderProps = {}) {
 
       {/* Quick Navigation - Conditional and Scroll-based */}
       {showNavigation && (
-        <div className={`border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 transition-all duration-300 overflow-hidden ${
-          isScrolled ? 'max-h-0 opacity-0' : 'max-h-20 opacity-100'
-        }`}>
+        <div
+          className={`border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 transition-all duration-500 ease-in-out overflow-hidden ${
+            isScrolled ? 'max-h-0 opacity-0' : 'max-h-20 opacity-100'
+          }`}
+          style={{
+            willChange: 'max-height, opacity',
+            transform: 'translateZ(0)', // Force hardware acceleration
+          }}
+        >
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-center h-12">
               {/* Centered Categories List */}
               <div className="flex items-center gap-6 overflow-x-auto scrollbar-hide">
-                {mockCategories.slice(0, 10).map((category) => (
+                {/* All Categories Link */}
+                <Link
+                  href="/categories"
+                  className="text-sm font-medium text-purple-600 hover:text-purple-700 transition-colors whitespace-nowrap"
+                >
+                  All Categories
+                </Link>
+
+                {/* Category Links */}
+                {categories.slice(0, 10).map(category => (
                   <Link
-                    key={category.id}
-                    href={`/categories/${category.slug}`}
+                    key={category._id}
+                    href={`/categories/${category._id}`}
                     className="text-sm font-medium hover:text-purple-600 transition-colors whitespace-nowrap"
                   >
                     {category.name}
@@ -158,4 +232,4 @@ export function Header({ layoutOverride }: HeaderProps = {}) {
       )}
     </header>
   )
-} 
+}

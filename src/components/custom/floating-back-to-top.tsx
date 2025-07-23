@@ -7,17 +7,17 @@ import { Button } from '@/components/ui/button'
 
 /**
  * Floating Back to Top Button Component
- * 
- * A floating action button that appears when user scrolls down and 
+ *
+ * A floating action button that appears when user scrolls down and
  * smoothly scrolls back to top when clicked. Always visible on bottom right.
- * 
+ *
  * Features:
  * - Appears after scrolling 300px
  * - Smooth scroll animation
  * - Fixed position (bottom right)
  * - Accessible design
  * - Hover effects
- * 
+ *
  * @example
  * ```tsx
  * <FloatingBackToTop />
@@ -45,7 +45,7 @@ export function FloatingBackToTop() {
   const handleScrollToTop = () => {
     window.scrollTo({
       top: 0,
-      behavior: 'smooth'
+      behavior: 'smooth',
     })
   }
 
@@ -70,4 +70,4 @@ export function FloatingBackToTop() {
       <ArrowUp className="w-5 h-5" />
     </Button>
   )
-} 
+}

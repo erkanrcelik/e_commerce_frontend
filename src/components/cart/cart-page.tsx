@@ -5,7 +5,7 @@ import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { useAppSelector } from '@/hooks/redux'
-import { useToast } from '@/hooks/use-toast'
+import type { CartResponse } from '@/types/customer-cart'
 
 import { BillingInfo } from './billing-info'
 import { CartItems } from './cart-items'
@@ -15,30 +15,51 @@ import { OrderSummary } from './order-summary'
 import { PaymentInfo } from './payment-info'
 
 /**
+ * Cart page component props
+ */
+interface CartPageProps {
+  /** Initial cart screen data from SSR */
+  initialData?: {
+    cart: CartResponse
+    recommendations: {
+      frequentlyBoughtTogether: any[]
+      personalized: any[]
+      popular: any[]
+    }
+  }
+}
+
+/**
  * Cart page component
- * 
+ *
  * Features:
  * - Multi-step checkout process with navigation
  * - Cart items management
  * - Billing information with validation
  * - Payment method selection
  * - Order review and confirmation
- * 
+ * - SSR data integration
+ *
  * @example
  * ```tsx
- * <CartPage />
+ * <CartPage initialData={cartScreenData} />
  * ```
  */
-export function CartPage() {
+export function CartPage({ initialData }: CartPageProps) {
   const { items } = useAppSelector(state => state.cart)
-  const [currentStep, setCurrentStep] = useState<'cart' | 'billing' | 'payment' | 'review'>('cart')
+  const [currentStep, setCurrentStep] = useState<
+    'cart' | 'billing' | 'payment' | 'review'
+  >('cart')
   const [billingValid, setBillingValid] = useState(false)
   const [paymentValid, setPaymentValid] = useState(false)
-  const { showSuccess, showError } = useToast()
 
   const steps = [
     { id: 'cart', label: 'My Cart', description: 'Review your items' },
-    { id: 'billing', label: 'Billing Information', description: 'Select delivery address' },
+    {
+      id: 'billing',
+      label: 'Billing Information',
+      description: 'Select delivery address',
+    },
     { id: 'payment', label: 'Payment', description: 'Choose payment method' },
     { id: 'review', label: 'Order Review', description: 'Confirm your order' },
   ]
@@ -58,24 +79,6 @@ export function CartPage() {
     const currentIndex = steps.findIndex(step => step.id === currentStep)
     if (currentIndex > 0) {
       setCurrentStep(steps[currentIndex - 1].id as typeof currentStep)
-    }
-  }
-
-  const handlePlaceOrder = async () => {
-    try {
-      // Simulate order placement
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      showSuccess({
-        message: 'Your order has been placed successfully!',
-        description: 'Order number: #ORD-2024-001',
-        duration: 5000,
-      })
-    } catch {
-      showError({
-        message: 'Failed to place order',
-        description: 'Please try again',
-      })
     }
   }
 
@@ -112,16 +115,19 @@ export function CartPage() {
   const getNextStepLabel = () => {
     const currentIndex = steps.findIndex(step => step.id === currentStep)
     if (currentIndex < steps.length - 1) {
-      const nextStep = steps[currentIndex + 1]
-      return `Continue to ${nextStep.label}`
+      return steps[currentIndex + 1].label
     }
-    return 'Next'
+    return 'Complete'
   }
 
   const renderStepContent = () => {
     switch (currentStep) {
       case 'cart':
-        return <CartItems />
+        return (
+          <CartItems 
+            recommendations={initialData?.recommendations}
+          />
+        )
       case 'billing':
         return <BillingInfo onValidationChange={setBillingValid} />
       case 'payment':
@@ -141,8 +147,8 @@ export function CartPage() {
       <div className="container mx-auto px-4 py-8">
         {/* Progress Indicator */}
         <div className="mb-8">
-          <CheckoutProgress 
-            steps={steps} 
+          <CheckoutProgress
+            steps={steps}
             currentStep={currentStep}
             onStepChange={handleStepChange}
             isStepDisabled={isStepDisabled}
@@ -159,10 +165,11 @@ export function CartPage() {
                     {steps.find(s => s.id === currentStep)?.label}
                   </h2>
                   <div className="text-sm text-gray-500 dark:text-gray-400">
-                    Step {steps.findIndex(s => s.id === currentStep) + 1} of {steps.length}
+                    Step {steps.findIndex(s => s.id === currentStep) + 1} of{' '}
+                    {steps.length}
                   </div>
                 </div>
-                
+
                 {renderStepContent()}
               </div>
             </div>
@@ -171,11 +178,8 @@ export function CartPage() {
           {/* Fixed Order Summary Sidebar with Navigation */}
           <div className="xl:col-span-1">
             <div className="sticky top-8 space-y-6">
-              <OrderSummary 
-                onConfirmOrder={handlePlaceOrder}
-                showConfirmButton={isLastStep}
-              />
-              
+              <OrderSummary showConfirmButton={isLastStep} />
+
               {/* Navigation Buttons */}
               <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6">
                 <div className="flex items-center justify-between">
@@ -210,4 +214,4 @@ export function CartPage() {
       </div>
     </div>
   )
-} 
+}

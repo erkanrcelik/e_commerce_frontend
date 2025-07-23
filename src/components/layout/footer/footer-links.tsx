@@ -1,5 +1,6 @@
 'use client'
 
+import type { Category } from '@/types/customer-category'
 import Link from 'next/link'
 
 /**
@@ -14,23 +15,32 @@ interface LinkSection {
 }
 
 /**
+ * Footer Links Section Component Props
+ */
+interface FooterLinksProps {
+  /** Categories to display in footer */
+  categories?: Category[]
+}
+
+/**
  * Footer Links Section Component
- * 
+ *
  * Displays organized navigation links in footer.
  * Groups links by category for better user experience.
- * 
+ *
  * Features:
  * - Categorized navigation links
  * - Responsive grid layout
  * - Hover effects
  * - SEO-friendly structure
- * 
+ * - Dynamic categories from API
+ *
  * @example
  * ```tsx
- * <FooterLinks />
+ * <FooterLinks categories={categories} />
  * ```
  */
-export function FooterLinks() {
+export function FooterLinks({ categories = [] }: FooterLinksProps) {
   /**
    * Footer navigation sections configuration
    */
@@ -39,51 +49,45 @@ export function FooterLinks() {
       title: 'Shop',
       links: [
         { label: 'All Products', href: '/products' },
-        { label: 'New Arrivals', href: '/products/new' },
-        { label: 'Best Sellers', href: '/products/best-sellers' },
-        { label: 'Sale Items', href: '/products/sale' },
-        { label: 'Gift Cards', href: '/gift-cards' },
-      ]
+        { label: 'Categories', href: '/categories' },
+        { label: 'Campaigns', href: '/campaigns' },
+        { label: 'Search', href: '/search' },
+      ],
     },
     {
-      title: 'Customer Care',
-      links: [
-        { label: 'Contact Us', href: '/contact' },
-        { label: 'FAQ', href: '/faq' },
-        { label: 'Shipping Info', href: '/shipping' },
-        { label: 'Returns', href: '/returns' },
-        { label: 'Size Guide', href: '/size-guide' },
-      ]
+      title: 'Categories',
+      links: categories.length > 0 
+        ? categories.slice(0, 5).map(category => ({
+            label: category.name,
+            href: `/categories/${category._id}`,
+          }))
+        : [
+            { label: 'Electronics', href: '/categories/electronics' },
+            { label: 'Fashion', href: '/categories/fashion' },
+            { label: 'Home & Garden', href: '/categories/home-garden' },
+            { label: 'Sports', href: '/categories/sports' },
+            { label: 'Books', href: '/categories/books' },
+          ],
     },
     {
       title: 'Account',
       links: [
-        { label: 'My Account', href: '/profile' },
-        { label: 'Order History', href: '/orders' },
-        { label: 'Wishlist', href: '/wishlist' },
-        { label: 'Track Order', href: '/track' },
-        { label: 'Address Book', href: '/addresses' },
-      ]
+        { label: 'My Profile', href: '/profile' },
+        { label: 'My Orders', href: '/profile/orders' },
+        { label: 'My Favorites', href: '/profile/favorites' },
+        { label: 'My Addresses', href: '/profile/addresses' },
+        { label: 'Account Settings', href: '/profile/settings' },
+      ],
     },
-    {
-      title: 'Company',
-      links: [
-        { label: 'About Us', href: '/about' },
-        { label: 'Careers', href: '/careers' },
-        { label: 'Press', href: '/press' },
-        { label: 'Sustainability', href: '/sustainability' },
-        { label: 'Investors', href: '/investors' },
-      ]
-    }
   ]
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-      {linkSections.map((section) => (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {linkSections.map(section => (
         <div key={section.title}>
           <h3 className="font-semibold text-white mb-4">{section.title}</h3>
           <ul className="space-y-2">
-            {section.links.map((link) => (
+            {section.links.map(link => (
               <li key={link.label}>
                 <Link
                   href={link.href}
@@ -98,4 +102,4 @@ export function FooterLinks() {
       ))}
     </div>
   )
-} 
+}

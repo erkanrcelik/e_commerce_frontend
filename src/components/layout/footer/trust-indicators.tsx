@@ -14,16 +14,16 @@ interface TrustIndicator {
 
 /**
  * Trust Indicators Component
- * 
+ *
  * Displays company trust and security features in footer.
  * Builds customer confidence with key service highlights.
- * 
+ *
  * Features:
  * - Security and trust badges
  * - Service highlights
  * - Responsive grid layout
  * - Icon-based visual indicators
- * 
+ *
  * @example
  * ```tsx
  * <TrustIndicators />
@@ -37,23 +37,23 @@ export function TrustIndicators() {
     {
       icon: Shield,
       title: 'Secure Shopping',
-      description: '256-bit SSL encryption'
+      description: '256-bit SSL encryption',
     },
     {
       icon: Truck,
       title: 'Fast Shipping',
-      description: 'Free shipping over $50'
+      description: 'Free shipping over $50',
     },
     {
       icon: CreditCard,
       title: 'Secure Payment',
-      description: 'Multiple payment options'
+      description: 'Multiple payment options',
     },
     {
       icon: Star,
       title: 'Top Rated',
-      description: '4.8/5 customer rating'
-    }
+      description: '4.8/5 customer rating',
+    },
   ]
 
   return (
@@ -71,4 +71,4 @@ export function TrustIndicators() {
       ))}
     </div>
   )
-} 
+}

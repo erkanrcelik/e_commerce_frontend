@@ -5,9 +5,8 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel'
-import type { Campaign } from '@/types/campaign'
+import type { Campaign } from '@/types/customer-campaign'
 
-import { DefaultHeroSlide } from './default-hero-slide'
 import { HeroSlide } from './hero-slide'
 
 /**
@@ -24,10 +23,10 @@ interface HeroCarouselProps {
 
 /**
  * Hero Carousel Component
- * 
+ *
  * Main hero section component that displays campaigns in a rotating carousel.
  * Automatically handles different scenarios: no campaigns, single campaign, or multiple campaigns.
- * 
+ *
  * Features:
  * - Automatic campaign carousel
  * - Single slide for one campaign
@@ -37,7 +36,7 @@ interface HeroCarouselProps {
  * - Dot indicators
  * - Responsive design
  * - Smooth transitions
- * 
+ *
  * @example
  * ```tsx
  * <HeroCarousel
@@ -47,14 +46,14 @@ interface HeroCarouselProps {
  * />
  * ```
  */
-export function HeroCarousel({ 
-  campaigns = [], 
+export function HeroCarousel({
+  campaigns = [],
   autoplay = true,
-  className
+  className,
 }: HeroCarouselProps) {
   // If no campaigns, show default hero
   if (campaigns.length === 0) {
-    return <DefaultHeroSlide className={className} />
+    return null
   }
 
   // Single campaign, no carousel needed
@@ -66,28 +65,32 @@ export function HeroCarousel({
     <div className={`relative ${className || ''}`}>
       <Carousel
         opts={{
-          align: "start",
+          align: 'start',
           loop: true,
         }}
-        plugins={autoplay ? [
-          // Auto-scroll every 5 seconds
-          // Note: You might need to install embla-carousel-autoplay
-          // For now, we'll use manual navigation
-        ] : undefined}
+        plugins={
+          autoplay
+            ? [
+                // Auto-scroll every 5 seconds
+                // Note: You might need to install embla-carousel-autoplay
+                // For now, we'll use manual navigation
+              ]
+            : undefined
+        }
         className="w-full"
       >
         <CarouselContent>
-          {campaigns.map((campaign) => (
-            <CarouselItem key={campaign.id}>
+          {campaigns.map(campaign => (
+            <CarouselItem key={campaign._id}>
               <HeroSlide campaign={campaign} />
             </CarouselItem>
           ))}
         </CarouselContent>
-        
+
         {/* Navigation */}
         <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border-white/20 text-white hover:text-white" />
         <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border-white/20 text-white hover:text-white" />
-        
+
         {/* Dots Indicator */}
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
           <div className="flex items-center gap-2">
@@ -102,4 +105,4 @@ export function HeroCarousel({
       </Carousel>
     </div>
   )
-} 
+}

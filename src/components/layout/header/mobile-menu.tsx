@@ -1,149 +1,264 @@
 'use client'
 
-import { Heart, Menu, Package, Settings, ShoppingBag, Star, User } from 'lucide-react'
+import {
+  Heart,
+  LogOut,
+  Menu,
+  Package,
+  Settings,
+  ShoppingBag,
+  Star,
+  User,
+} from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import {
-    Sheet,
-    SheetContent,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
 } from '@/components/ui/sheet'
-import { useAppSelector } from '@/hooks/redux'
-import { mockCategories } from '@/lib/mock-data'
+import { logoutUser } from '@/features/auth/authSlice'
+import { useAppDispatch, useAppSelector } from '@/hooks/redux'
+import { CustomerCategoryService } from '@/services/customer-category.service'
+import type { Category } from '@/types/customer-category'
+import Image from 'next/image'
 
 /**
  * Mobile Menu Component
- * 
+ *
  * Provides mobile navigation with categories, user account options, and authentication.
  * Uses a slide-out drawer interface optimized for mobile devices with enhanced design.
- * 
+ *
+ * Features:
+ * - User authentication display
+ * - Quick action links
+ * - Category navigation
+ * - Logout functionality
+ * - Responsive design
+ *
  * @example
  * ```tsx
  * <MobileMenu />
  * ```
  */
 export function MobileMenu() {
+  const dispatch = useAppDispatch()
+  const router = useRouter()
   const { user, status } = useAppSelector(state => state.auth)
   const isAuthenticated = status === 'authenticated' && !!user
+  const [categories, setCategories] = useState<Category[]>([])
+
+  /**
+   * Load categories on component mount
+   */
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const categoriesData = await CustomerCategoryService.getCategories({
+          limit: 10,
+        })
+        setCategories(categoriesData.data)
+      } catch (error) {
+        console.error('Load categories error:', error)
+        // Handle error
+      }
+    }
+
+    loadCategories()
+  }, [])
+
+  /**
+   * Handle user logout
+   *
+   * Calls the logout API, clears authentication state,
+   * and redirects to home page with success feedback.
+   */
+  const handleLogout = async () => {
+    try {
+      // Show loading toast
+      toast.loading('Logging out...', {
+        id: 'logout',
+      })
+
+      // Dispatch logout action
+      await dispatch(logoutUser()).unwrap()
+
+      // Show success message
+      toast.success('Logged out successfully', {
+        id: 'logout',
+        description: 'You have been logged out successfully.',
+      })
+
+      // Redirect to home page
+      router.push('/')
+    } catch (error) {
+      console.error('Load user data error:', error)
+      // Handle error
+    }
+  }
 
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="lg:hidden h-10 w-10 rounded-xl"
-          aria-label="Open mobile menu"
-        >
-          <Menu className="w-5 h-5" />
+        <Button variant="ghost" size="icon" className="md:hidden">
+          <Menu className="h-5 w-5" />
+          <span className="sr-only">Toggle menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-80 bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 p-6">
-        <SheetHeader className="text-left mb-8">
-          <SheetTitle className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-600 via-blue-600 to-purple-700 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-sm">P</span>
+      <SheetContent side="left" className="w-[300px] sm:w-[350px] p-0">
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <SheetHeader className="px-6 py-4 border-b">
+            <SheetTitle className="text-left">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-purple-600 via-blue-600 to-purple-700 rounded-xl flex items-center justify-center shadow-lg overflow-hidden">
+                  <Image
+                    src="/logo.svg"
+                    alt="playableFactory"
+                    width={32}
+                    height={32}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                  playableFactory
+                </span>
+              </div>
+            </SheetTitle>
+          </SheetHeader>
+
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto">
+            {/* User Section */}
+            <div className="px-6 py-4 border-b bg-gray-50 dark:bg-gray-800/50">
+              {isAuthenticated ? (
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center overflow-hidden">
+                    {user?.avatar ? (
+                      <Image
+                        src={user.avatar}
+                        alt={`${user.firstName} ${user.lastName}`}
+                        width={40}
+                        height={40}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <User className="h-5 w-5 text-white" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">
+                      {user?.firstName} {user?.lastName}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {user?.email}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Link href="/login">
+                    <Button variant="default" size="sm" className="w-full">
+                      Login
+                    </Button>
+                  </Link>
+                  <Link href="/register">
+                    <Button variant="outline" size="sm" className="w-full">
+                      Create Account
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-              playableFactory
-            </span>
-          </SheetTitle>
-          {isAuthenticated && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-              Welcome back, {user.firstName}!
-            </p>
-          )}
-        </SheetHeader>
-        
-        <div className="space-y-8">
-          {/* Authentication Section */}
-          {!isAuthenticated && (
-            <div className="space-y-3">
-              <Button 
-                asChild 
-                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 h-12 rounded-xl"
-              >
-                <Link href="/login">Sign In</Link>
-              </Button>
-              <Button asChild variant="outline" className="w-full h-12 rounded-xl">
-                <Link href="/register">Create Account</Link>
-              </Button>
-            </div>
-          )}
-          
-          {/* Quick Actions */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-              <ShoppingBag className="w-4 h-4" />
-              Quick Actions
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              <Link
-                href="/products"
-                className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-700 transition-all duration-300 text-center bg-white dark:bg-gray-800 hover:shadow-md"
-              >
-                <Package className="w-6 h-6 mx-auto mb-2 text-purple-600" />
-                <div className="text-sm font-medium">All Products</div>
-              </Link>
-              <Link
-                href="/wishlist"
-                className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-700 transition-all duration-300 text-center bg-white dark:bg-gray-800 hover:shadow-md"
-              >
-                <Heart className="w-6 h-6 mx-auto mb-2 text-red-500" />
-                <div className="text-sm font-medium">Wishlist</div>
-              </Link>
-            </div>
-          </div>
-          
-          {/* Categories Section */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-              <Star className="w-4 h-4" />
-              Categories
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              {mockCategories.slice(0, 8).map((category) => (
-                <Link
-                  key={category.id}
-                  href={`/categories/${category.slug}`}
-                  className="p-3 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-700 transition-all duration-300 text-center bg-white dark:bg-gray-800 hover:shadow-md text-sm"
-                >
-                  {category.name}
-                </Link>
-              ))}
-            </div>
-          </div>
-          
-          {/* Account Section (Authenticated Users) */}
-          {isAuthenticated && (
-            <div className="space-y-4">
-              <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <User className="w-4 h-4" />
-                Account
+
+            {/* Quick Actions */}
+            <div className="px-6 py-4 border-b">
+              <h3 className="font-medium text-sm text-gray-900 dark:text-white mb-3">
+                Quick Actions
               </h3>
-              <div className="space-y-2">
-                <Link 
-                  href="/orders" 
-                  className="flex items-center gap-3 py-3 px-4 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-sm"
+              <div className="space-y-1">
+                <Link
+                  href="/profile/orders"
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 >
-                  <Package className="w-4 h-4" />
-                  My Orders
+                  <Package className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm">My Orders</span>
                 </Link>
-                <Link 
-                  href="/profile" 
-                  className="flex items-center gap-3 py-3 px-4 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-sm"
+                <Link
+                  href="/profile/favorites"
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 >
-                  <Settings className="w-4 h-4" />
-                  Profile Settings
+                  <Heart className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm">My Favorites</span>
+                </Link>
+                <Link
+                  href="/profile/reviews"
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                >
+                  <Star className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm">My Reviews</span>
+                </Link>
+                <Link
+                  href="/profile/comments"
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                >
+                  <Star className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm">My Comments</span>
                 </Link>
               </div>
+            </div>
+
+            {/* Categories */}
+            <div className="px-6 py-4">
+              <h3 className="font-medium text-sm text-gray-900 dark:text-white mb-3">
+                Categories
+              </h3>
+              <div className="space-y-1">
+                {categories.map(category => (
+                  <Link
+                    key={category._id}
+                    href={`/categories/${category._id}`}
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    <ShoppingBag className="h-4 w-4 text-gray-500" />
+                    <span className="text-sm">{category.name}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          {isAuthenticated && (
+            <div className="border-t p-6 space-y-2">
+              <Link
+                href="/profile"
+                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                <Settings className="h-4 w-4 text-gray-500" />
+                <span className="text-sm">Account Settings</span>
+              </Link>
+
+              {/* Logout Button */}
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors w-full text-left"
+              >
+                <LogOut className="h-4 w-4 text-red-500" />
+                <span className="text-sm text-red-600 dark:text-red-400">
+                  Logout
+                </span>
+              </button>
             </div>
           )}
         </div>
       </SheetContent>
     </Sheet>
   )
-} 
+}

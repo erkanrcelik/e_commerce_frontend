@@ -8,15 +8,15 @@ import { Input } from '@/components/ui/input'
 
 /**
  * Newsletter Signup Component
- * 
+ *
  * Provides email subscription form for footer section.
  * Allows users to subscribe to newsletter updates.
- * 
+ *
  * Features:
  * - Email input validation
  * - Responsive design
  * - Newsletter subscription
- * 
+ *
  * @example
  * ```tsx
  * <NewsletterSignup />
@@ -30,14 +30,11 @@ export function NewsletterSignup() {
   const handleSubscribe = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     // TODO: Implement newsletter subscription logic
-    // console.log('Newsletter subscription submitted')
   }
 
   return (
     <div className="max-w-md">
-      <h3 className="text-lg font-semibold text-white mb-4">
-        Stay Updated
-      </h3>
+      <h3 className="text-lg font-semibold text-white mb-4">Stay Updated</h3>
       <p className="text-gray-300 text-sm mb-4">
         Get the latest updates on new arrivals and exclusive deals.
       </p>
@@ -49,7 +46,7 @@ export function NewsletterSignup() {
           required
           aria-label="Email address for newsletter"
         />
-        <Button 
+        <Button
           type="submit"
           className="bg-orange-500 hover:bg-orange-600 px-4"
           aria-label="Subscribe to newsletter"
@@ -59,4 +56,4 @@ export function NewsletterSignup() {
       </form>
     </div>
   )
-} 
+}

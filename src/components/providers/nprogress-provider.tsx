@@ -6,7 +6,7 @@ import { Suspense, useEffect } from 'react'
 
 /**
  * NProgress Provider
- * 
+ *
  * Shows progress bar above header during page transitions
  */
 function NProgressInner() {
@@ -14,18 +14,18 @@ function NProgressInner() {
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    NProgress.configure({ 
+    NProgress.configure({
       showSpinner: false,
       minimum: 0.1,
       easing: 'ease',
       speed: 500,
-      trickleSpeed: 200
+      trickleSpeed: 200,
     })
   }, [])
 
   useEffect(() => {
     NProgress.start()
-    
+
     // Complete progress with a short delay
     const timer = setTimeout(() => {
       NProgress.done()
@@ -49,4 +49,4 @@ export function NProgressProvider({ children }: { children: React.ReactNode }) {
       {children}
     </>
   )
-} 
+}

@@ -18,14 +18,14 @@ interface ViewToggleProps {
 
 /**
  * View Toggle Component
- * 
+ *
  * Toggle between grid and list view for product display.
- * 
+ *
  * Features:
  * - Grid and list view options
  * - Visual indicators for current view
  * - Responsive design
- * 
+ *
  * @example
  * ```tsx
  * <ViewToggle
@@ -34,11 +34,7 @@ interface ViewToggleProps {
  * />
  * ```
  */
-export function ViewToggle({
-  value,
-  onChange,
-  className
-}: ViewToggleProps) {
+export function ViewToggle({ value, onChange, className }: ViewToggleProps) {
   return (
     <div className={`flex items-center border rounded-lg ${className || ''}`}>
       <Button
@@ -59,4 +55,4 @@ export function ViewToggle({
       </Button>
     </div>
   )
-} 
+}

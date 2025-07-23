@@ -1,18 +1,17 @@
 'use client'
 
-
 /**
  * Payment Methods Component
- * 
+ *
  * Displays accepted payment methods in footer.
  * Shows customers available payment options for trust and convenience.
- * 
+ *
  * Features:
  * - List of accepted payment methods
  * - Clean badge design
  * - Responsive layout
  * - Trust indicator
- * 
+ *
  * @example
  * ```tsx
  * <PaymentMethods />
@@ -35,7 +34,7 @@ export function PaymentMethods() {
     <div>
       <h4 className="text-sm font-semibold text-white mb-3">We Accept</h4>
       <div className="flex flex-wrap items-center gap-2">
-        {paymentMethods.map((method) => (
+        {paymentMethods.map(method => (
           <div
             key={method.name}
             className="px-2 py-1 bg-gray-700 rounded text-xs text-gray-300 hover:bg-gray-600 transition-colors"
@@ -45,11 +44,11 @@ export function PaymentMethods() {
           </div>
         ))}
       </div>
-      
+
       {/* Additional payment info */}
       <div className="mt-3 text-xs text-gray-400">
         <p>All transactions are secure and encrypted</p>
       </div>
     </div>
   )
-} 
+}

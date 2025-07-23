@@ -1,6 +1,5 @@
 'use client'
 
-
 import { SectionHeader } from '@/components/custom/section-header'
 import {
   Carousel,
@@ -9,9 +8,10 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel'
-import type { Category } from '@/types/product'
+import type { Category } from '@/types/customer-category'
 
 import { CategoryCard } from './category-card'
+
 
 /**
  * Categories Carousel Section Props
@@ -29,10 +29,10 @@ interface CategoriesCarouselProps {
 
 /**
  * Categories Grid/Carousel Section Component
- * 
+ *
  * Displays product categories in a horizontal scrollable carousel using Shadcn Carousel.
  * Used to showcase product categories with engaging visual design.
- * 
+ *
  * Features:
  * - Horizontal category carousel using Shadcn
  * - Section header with view all link
@@ -41,7 +41,7 @@ interface CategoriesCarouselProps {
  * - Touch/swipe support
  * - Navigation buttons positioned on sides
  * - Mobile scroll hint
- * 
+ *
  * @example
  * ```tsx
  * <CategoriesGrid
@@ -51,12 +51,17 @@ interface CategoriesCarouselProps {
  * />
  * ```
  */
-export function CategoriesGrid({ 
-  categories, 
-  title = "Shop by Category", 
+export function CategoriesGrid({
+  categories,
+  title = 'Shop by Category',
   subtitle,
-  className
+  className,
 }: CategoriesCarouselProps) {
+  // Don't render if no categories
+  if (!categories || categories.length === 0) {
+    return null
+  }
+
   return (
     <section className={`py-6 bg-gray-50 dark:bg-gray-900 ${className || ''}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -72,26 +77,24 @@ export function CategoriesGrid({
         <div className="relative">
           <Carousel
             opts={{
-              align: "start",
+              align: 'start',
               loop: false,
               skipSnaps: false,
-              containScroll: "trimSnaps",
+              containScroll: 'trimSnaps',
             }}
             className="w-full"
           >
             <CarouselContent className="-ml-4">
-              {categories.map((category) => (
-                <CarouselItem 
-                  key={category.id} 
+              {categories.map(category => (
+                <CarouselItem
+                  key={category._id}
                   className="pl-4 basis-[200px] sm:basis-[250px] lg:basis-[300px]"
                 >
-                  <CategoryCard 
-                    category={category} 
-                  />
+                  <CategoryCard category={category} />
                 </CarouselItem>
               ))}
             </CarouselContent>
-            
+
             {/* Navigation Buttons */}
             <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 dark:bg-gray-800/90 border shadow-lg hover:bg-white dark:hover:bg-gray-800 backdrop-blur-sm" />
             <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 dark:bg-gray-800/90 border shadow-lg hover:bg-white dark:hover:bg-gray-800 backdrop-blur-sm" />
@@ -100,4 +103,4 @@ export function CategoriesGrid({
       </div>
     </section>
   )
-} 
+}

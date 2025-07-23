@@ -87,4 +87,4 @@ export interface OrderSummary {
   discount: number
   total: number
   itemsCount: number
-} 
+}

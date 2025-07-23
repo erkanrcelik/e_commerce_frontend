@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import { ProductDetailPage } from '@/components/product/detail'
-import { getProductBySlug, getProductsByCategory } from '@/services/product.service'
+import { CustomerProductService } from '@/services/customer-product.service'
 
 interface ProductPageProps {
   params: Promise<{
@@ -10,34 +10,41 @@ interface ProductPageProps {
   }>
 }
 
-export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: ProductPageProps): Promise<Metadata> {
   const { slug } = await params
-  const product = await getProductBySlug(slug)
-  
-  if (!product) {
-    return {
-      title: 'Ürün Bulunamadı - playableFactory',
-      description: 'Aradığınız ürün bulunamadı.',
-    }
-  }
 
-  return {
-    title: `${product.name} - playableFactory`,
-    description: product.description || `${product.name} ürününü keşfedin`,
-    keywords: [product.name, product.category?.name, 'ürün', 'alışveriş'],
-    openGraph: {
-      title: product.name,
-      description: product.description,
-      images: product.images.map(img => img.url),
-    },
+  try {
+    // Use the slug as product ID directly
+    const product = await CustomerProductService.getProduct(slug)
+
+    return {
+      title: `${product.name} - playableFactory`,
+      description: product.description || `Discover ${product.name}`,
+      keywords: [product.name, product.category?.name, 'product', 'shopping'],
+      openGraph: {
+        title: product.name,
+        description: product.description,
+        images: product.imageUrls,
+      },
+    }
+  } catch (error) {
+    console.error('  Failed to generate product metadata:', error)
+    return {
+      title: 'Product Not Found - playableFactory',
+      description: 'The product you are looking for was not found.',
+    }
   }
 }
 
 /**
  * Product Detail Page
- * 
+ *
  * Dynamic product detail page with comprehensive product information.
- * 
+ * Uses product ID directly from URL slug.
+ * Only shows data that is returned by the API.
+ *
  * Features:
  * - Product image gallery
  * - Product information and pricing
@@ -45,27 +52,18 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
  * - Add to cart functionality
  * - Product specifications
  * - Related products
- * - Seller information
- * - Campaign details
+ * - Seller information from product API
  */
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params
-  const product = await getProductBySlug(slug)
-  
-  if (!product) {
+
+  try {
+    // Use the slug as product ID directly
+    const product = await CustomerProductService.getProduct(slug)
+
+    return <ProductDetailPage product={product} />
+  } catch (error) {
+    console.error('  Failed to fetch product data:', error)
     notFound()
   }
-
-  // Get related products from same category
-  const relatedProductsResponse = await getProductsByCategory(product.categoryId)
-  const relatedProducts = relatedProductsResponse.products
-    .filter(p => p.id !== product.id)
-    .slice(0, 4)
-
-  return (
-    <ProductDetailPage
-      product={product}
-      relatedProducts={relatedProducts}
-    />
-  )
-} 
+}

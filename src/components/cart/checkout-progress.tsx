@@ -15,13 +15,13 @@ interface Step {
 
 /**
  * Checkout progress component
- * 
+ *
  * Shows the current step in the checkout process with navigation
- * 
+ *
  * @example
  * ```tsx
- * <CheckoutProgress 
- *   steps={steps} 
+ * <CheckoutProgress
+ *   steps={steps}
  *   currentStep="cart"
  *   onStepChange={handleStepChange}
  * />
@@ -72,10 +72,14 @@ export function CheckoutProgress({
                     className={cn(
                       'flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-300 shadow-lg',
                       {
-                        'bg-gradient-to-r from-purple-500 to-blue-500 border-purple-500 text-white shadow-purple-500/25': isActive,
-                        'bg-gradient-to-r from-green-500 to-emerald-500 border-green-500 text-white shadow-green-500/25': isCompleted,
-                        'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-purple-300 dark:hover:border-purple-600': !isActive && !isCompleted && canNavigate,
-                        'bg-gray-100 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-400 dark:text-gray-500 cursor-not-allowed': !canNavigate,
+                        'bg-gradient-to-r from-purple-500 to-blue-500 border-purple-500 text-white shadow-purple-500/25':
+                          isActive,
+                        'bg-gradient-to-r from-green-500 to-emerald-500 border-green-500 text-white shadow-green-500/25':
+                          isCompleted,
+                        'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-purple-300 dark:hover:border-purple-600':
+                          !isActive && !isCompleted && canNavigate,
+                        'bg-gray-100 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-400 dark:text-gray-500 cursor-not-allowed':
+                          !canNavigate,
                       }
                     )}
                   >
@@ -85,17 +89,17 @@ export function CheckoutProgress({
                       <span className="text-sm font-semibold">{index + 1}</span>
                     )}
                   </button>
-                  
+
                   {/* Step Label */}
                   <div className="mt-3 text-center">
-                    <div className={cn(
-                      'text-sm font-semibold',
-                      {
+                    <div
+                      className={cn('text-sm font-semibold', {
                         'text-purple-600 dark:text-purple-400': isActive,
                         'text-green-600 dark:text-green-400': isCompleted,
-                        'text-gray-500 dark:text-gray-400': !isActive && !isCompleted,
-                      }
-                    )}>
+                        'text-gray-500 dark:text-gray-400':
+                          !isActive && !isCompleted,
+                      })}
+                    >
                       {step.label}
                     </div>
                     <div className="text-xs text-gray-400 dark:text-gray-500 mt-1 hidden sm:block max-w-24">
@@ -107,14 +111,19 @@ export function CheckoutProgress({
                 {/* Connector Line */}
                 {index < steps.length - 1 && (
                   <div className="flex-1 mx-6">
-                    <div className={cn(
-                      'h-1 rounded-full transition-all duration-300',
-                      {
-                        'bg-gradient-to-r from-green-500 to-emerald-500': index < currentStepIndex,
-                        'bg-gradient-to-r from-purple-500 to-blue-500': index === currentStepIndex,
-                        'bg-gray-200 dark:bg-gray-600': index > currentStepIndex,
-                      }
-                    )} />
+                    <div
+                      className={cn(
+                        'h-1 rounded-full transition-all duration-300',
+                        {
+                          'bg-gradient-to-r from-green-500 to-emerald-500':
+                            index < currentStepIndex,
+                          'bg-gradient-to-r from-purple-500 to-blue-500':
+                            index === currentStepIndex,
+                          'bg-gray-200 dark:bg-gray-600':
+                            index > currentStepIndex,
+                        }
+                      )}
+                    />
                   </div>
                 )}
               </div>
@@ -124,4 +133,4 @@ export function CheckoutProgress({
       </div>
     </div>
   )
-} 
+}

@@ -1,6 +1,12 @@
-import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import {
+  createAsyncThunk,
+  createSlice,
+  type PayloadAction,
+} from '@reduxjs/toolkit'
 
-import { AuthService } from '@/services/auth.service';
+import { parseApiErrorMessage } from '@/lib/api-error'
+import { AuthService } from '@/services/customer-auth.service'
+import { CustomerWishlistService } from '@/services/customer-wishlist.service'
 import type {
   AuthError,
   AuthResponse,
@@ -10,7 +16,8 @@ import type {
   RegisterFormData,
   ResetPasswordFormData,
   User,
-} from '@/types/auth';
+} from '@/types/customer-auth'
+import type { WishlistItem } from '@/types/customer-wishlist'
 
 /**
  * Initial authentication state
@@ -19,7 +26,9 @@ const initialState: AuthState = {
   user: null,
   status: 'idle',
   error: null,
-};
+  wishlist: [],
+  wishlistLoading: false,
+}
 
 /**
  * Login user async thunk
@@ -31,63 +40,61 @@ export const loginUser = createAsyncThunk<
   { rejectValue: AuthError }
 >('auth/loginUser', async (credentials, { rejectWithValue }) => {
   try {
-    return await AuthService.login(credentials);
+    return await AuthService.login(credentials)
   } catch (error: unknown) {
-    console.error('Login error:', error);
-
     // Handle axios error response
     if (error && typeof error === 'object' && 'response' in error) {
       const axiosError = error as {
-        response?: { data?: { message?: string; code?: string } };
-      };
+        response?: { data?: { message?: string; code?: string } }
+      }
       if (axiosError.response?.data) {
+        const errorMessage = parseApiErrorMessage(axiosError.response.data as any)
         return rejectWithValue({
-          message: axiosError.response.data.message || 'Login failed',
-          code: axiosError.response.data.code || 'LOGIN_ERROR',
-        });
+          message: errorMessage || 'Login failed',
+          code: 'LOGIN_ERROR',
+        })
       }
     }
 
     return rejectWithValue({
       message: 'Network error occurred',
       code: 'NETWORK_ERROR',
-    });
+    })
   }
-});
+})
 
 /**
  * Register user async thunk
  * @param userData - User registration data
  */
 export const registerUser = createAsyncThunk<
-  AuthResponse,
+  { message: string },
   RegisterFormData,
   { rejectValue: AuthError }
 >('auth/registerUser', async (userData, { rejectWithValue }) => {
   try {
-    return await AuthService.register(userData);
+    return await AuthService.register(userData)
   } catch (error: unknown) {
-    console.error('Registration error:', error);
-
     // Handle axios error response
     if (error && typeof error === 'object' && 'response' in error) {
       const axiosError = error as {
-        response?: { data?: { message?: string; code?: string } };
-      };
+        response?: { data?: { message?: string; code?: string } }
+      }
       if (axiosError.response?.data) {
+        const errorMessage = parseApiErrorMessage(axiosError.response.data as any)
         return rejectWithValue({
-          message: axiosError.response.data.message || 'Registration failed',
-          code: axiosError.response.data.code || 'REGISTRATION_ERROR',
-        });
+          message: errorMessage || 'Registration failed',
+          code: 'REGISTER_ERROR',
+        })
       }
     }
 
     return rejectWithValue({
       message: 'Registration failed',
-      code: 'REGISTRATION_ERROR',
-    });
+      code: 'REGISTER_ERROR',
+    })
   }
-});
+})
 
 /**
  * Forgot password async thunk
@@ -99,30 +106,28 @@ export const forgotPassword = createAsyncThunk<
   { rejectValue: AuthError }
 >('auth/forgotPassword', async (emailData, { rejectWithValue }) => {
   try {
-    return await AuthService.forgotPassword(emailData);
+    return await AuthService.forgotPassword(emailData)
   } catch (error: unknown) {
-    console.error('Forgot password error:', error);
-
     // Handle axios error response
     if (error && typeof error === 'object' && 'response' in error) {
       const axiosError = error as {
-        response?: { data?: { message?: string; code?: string } };
-      };
+        response?: { data?: { message?: string; code?: string } }
+      }
       if (axiosError.response?.data) {
         return rejectWithValue({
           message:
             axiosError.response.data.message || 'Failed to send reset email',
           code: axiosError.response.data.code || 'FORGOT_PASSWORD_ERROR',
-        });
+        })
       }
     }
 
     return rejectWithValue({
       message: 'Failed to send reset email',
       code: 'FORGOT_PASSWORD_ERROR',
-    });
+    })
   }
-});
+})
 
 /**
  * Reset password async thunk
@@ -134,64 +139,94 @@ export const resetPassword = createAsyncThunk<
   { rejectValue: AuthError }
 >('auth/resetPassword', async (resetData, { rejectWithValue }) => {
   try {
-    return await AuthService.resetPassword(resetData);
+    return await AuthService.resetPassword(resetData)
   } catch (error: unknown) {
-    console.error('Reset password error:', error);
-
     // Handle axios error response
     if (error && typeof error === 'object' && 'response' in error) {
       const axiosError = error as {
-        response?: { data?: { message?: string; code?: string } };
-      };
+        response?: { data?: { message?: string; code?: string } }
+      }
       if (axiosError.response?.data) {
         return rejectWithValue({
           message: axiosError.response.data.message || 'Password reset failed',
           code: axiosError.response.data.code || 'RESET_PASSWORD_ERROR',
-        });
+        })
       }
     }
 
     return rejectWithValue({
       message: 'Password reset failed',
       code: 'RESET_PASSWORD_ERROR',
-    });
+    })
   }
-});
+})
 
 /**
  * Verify email async thunk
- * @param token - Email verification token
+ * @param params - Email verification parameters
  */
 export const verifyEmail = createAsyncThunk<
   { message: string },
-  string,
+  { token: string; email: string },
   { rejectValue: AuthError }
->('auth/verifyEmail', async (token, { rejectWithValue }) => {
+>('auth/verifyEmail', async (params, { rejectWithValue }) => {
   try {
-    return await AuthService.verifyEmail(token);
+    return await AuthService.verifyEmail(params.token, params.email)
   } catch (error: unknown) {
-    console.error('Email verification error:', error);
-
     // Handle axios error response
     if (error && typeof error === 'object' && 'response' in error) {
       const axiosError = error as {
-        response?: { data?: { message?: string; code?: string } };
-      };
+        response?: { data?: { message?: string; code?: string } }
+      }
       if (axiosError.response?.data) {
         return rejectWithValue({
           message:
             axiosError.response.data.message || 'Email verification failed',
           code: axiosError.response.data.code || 'EMAIL_VERIFICATION_ERROR',
-        });
+        })
       }
     }
 
     return rejectWithValue({
       message: 'Email verification failed',
       code: 'EMAIL_VERIFICATION_ERROR',
-    });
+    })
   }
-});
+})
+
+/**
+ * Resend verification email async thunk
+ * @param email - User email for verification
+ */
+export const resendVerification = createAsyncThunk<
+  { message: string },
+  string,
+  { rejectValue: AuthError }
+>('auth/resendVerification', async (email, { rejectWithValue }) => {
+  try {
+    return await AuthService.resendVerification(email)
+  } catch (error: unknown) {
+    // Handle axios error response
+    if (error && typeof error === 'object' && 'response' in error) {
+      const axiosError = error as {
+        response?: { data?: { message?: string; code?: string } }
+      }
+      if (axiosError.response?.data) {
+        return rejectWithValue({
+          message:
+            axiosError.response.data.message ||
+            'Failed to resend verification email',
+          code: axiosError.response.data.code || 'RESEND_VERIFICATION_ERROR',
+        })
+      }
+    }
+
+    return rejectWithValue({
+      message: 'Failed to resend verification email',
+      code: 'RESEND_VERIFICATION_ERROR',
+    })
+  }
+})
 
 /**
  * Logout user async thunk
@@ -199,9 +234,9 @@ export const verifyEmail = createAsyncThunk<
 export const logoutUser = createAsyncThunk<void, void>(
   'auth/logoutUser',
   async () => {
-    await AuthService.logout();
+    await AuthService.logout()
   }
-);
+)
 
 /**
  * Get user profile async thunk
@@ -212,29 +247,210 @@ export const getUserProfile = createAsyncThunk<
   { rejectValue: AuthError }
 >('auth/getUserProfile', async (_, { rejectWithValue }) => {
   try {
-    return await AuthService.getProfile();
-  } catch (error: unknown) {
-    console.error('Get profile error:', error);
+    const userInfo = await AuthService.getUserInfo()
 
+    // Transform the API response to match User interface
+    const user: User = {
+      id: userInfo.id,
+      email: userInfo.email,
+      firstName: userInfo.firstName,
+      lastName: userInfo.lastName,
+      role: userInfo.role as 'admin' | 'customer' | 'seller',
+      isEmailVerified: userInfo.isEmailVerified,
+      isActive: userInfo.isActive,
+      avatar: undefined, // API doesn't return avatar
+      createdAt: userInfo.createdAt,
+      updatedAt: userInfo.updatedAt,
+    }
+
+    return user
+  } catch (error: unknown) {
     // Handle axios error response
     if (error && typeof error === 'object' && 'response' in error) {
       const axiosError = error as {
-        response?: { data?: { message?: string; code?: string } };
-      };
+        response?: { data?: { message?: string; code?: string } }
+      }
       if (axiosError.response?.data) {
         return rejectWithValue({
           message: axiosError.response.data.message || 'Failed to get profile',
           code: axiosError.response.data.code || 'PROFILE_ERROR',
-        });
+        })
       }
     }
 
     return rejectWithValue({
       message: 'Failed to get profile',
       code: 'PROFILE_ERROR',
-    });
+    })
   }
-});
+})
+
+/**
+ * Refresh token async thunk
+ */
+export const refreshToken = createAsyncThunk<
+  AuthResponse,
+  void,
+  { rejectValue: AuthError }
+>('auth/refreshToken', async (_, { rejectWithValue }) => {
+  try {
+    return await AuthService.refreshToken()
+  } catch (error: unknown) {
+    // Handle axios error response
+    if (error && typeof error === 'object' && 'response' in error) {
+      const axiosError = error as {
+        response?: { data?: { message?: string; code?: string } }
+      }
+      if (axiosError.response?.data) {
+        return rejectWithValue({
+          message: axiosError.response.data.message || 'Token refresh failed',
+          code: axiosError.response.data.code || 'REFRESH_TOKEN_ERROR',
+        })
+      }
+    }
+
+    return rejectWithValue({
+      message: 'Token refresh failed',
+      code: 'REFRESH_TOKEN_ERROR',
+    })
+  }
+})
+
+/**
+ * Get wishlist async thunk
+ */
+export const getWishlist = createAsyncThunk<
+  WishlistItem[],
+  void,
+  { rejectValue: AuthError }
+>('auth/getWishlist', async (_, { rejectWithValue }) => {
+  try {
+    return await CustomerWishlistService.getWishlist()
+  } catch (error: unknown) {
+    // Handle axios error response
+    if (error && typeof error === 'object' && 'response' in error) {
+      const axiosError = error as {
+        response?: { data?: { message?: string; code?: string } }
+      }
+      if (axiosError.response?.data) {
+        return rejectWithValue({
+          message: axiosError.response.data.message || 'Failed to get wishlist',
+          code: axiosError.response.data.code || 'WISHLIST_ERROR',
+        })
+      }
+    }
+
+    return rejectWithValue({
+      message: 'Failed to get wishlist',
+      code: 'WISHLIST_ERROR',
+    })
+  }
+})
+
+/**
+ * Add item to wishlist async thunk
+ * @param productId - ID of the product to add
+ */
+export const addToWishlist = createAsyncThunk<
+  WishlistItem,
+  string,
+  { rejectValue: AuthError }
+>('auth/addToWishlist', async (productId, { rejectWithValue }) => {
+  try {
+    return await CustomerWishlistService.addToWishlist(productId)
+  } catch (error: unknown) {
+    // Handle axios error response
+    if (error && typeof error === 'object' && 'response' in error) {
+      const axiosError = error as {
+        response?: { data?: { message?: string; code?: string } }
+      }
+      if (axiosError.response?.data) {
+        return rejectWithValue({
+          message:
+            axiosError.response.data.message ||
+            'Failed to add item to wishlist',
+          code: axiosError.response.data.code || 'ADD_TO_WISHLIST_ERROR',
+        })
+      }
+    }
+
+    return rejectWithValue({
+      message: 'Failed to add item to wishlist',
+      code: 'ADD_TO_WISHLIST_ERROR',
+    })
+  }
+})
+
+/**
+ * Remove item from wishlist async thunk
+ * @param productId - ID of the product to remove
+ */
+export const removeFromWishlist = createAsyncThunk<
+  string,
+  string,
+  { rejectValue: AuthError }
+>('auth/removeFromWishlist', async (productId, { rejectWithValue }) => {
+  try {
+    await CustomerWishlistService.removeFromWishlist(productId)
+    return productId // Return the removed product ID
+  } catch (error: unknown) {
+    // Handle axios error response
+    if (error && typeof error === 'object' && 'response' in error) {
+      const axiosError = error as {
+        response?: { data?: { message?: string; code?: string } }
+      }
+      if (axiosError.response?.data) {
+        return rejectWithValue({
+          message:
+            axiosError.response.data.message ||
+            'Failed to remove item from wishlist',
+          code: axiosError.response.data.code || 'REMOVE_FROM_WISHLIST_ERROR',
+        })
+      }
+    }
+
+    return rejectWithValue({
+      message: 'Failed to remove item from wishlist',
+      code: 'REMOVE_FROM_WISHLIST_ERROR',
+    })
+  }
+})
+
+/**
+ * Clear wishlist async thunk
+ */
+export const clearWishlist = createAsyncThunk<
+  void,
+  void,
+  { rejectValue: AuthError }
+>('auth/clearWishlist', async (_, { rejectWithValue }) => {
+  try {
+    // Get all wishlist items and remove them one by one
+    const wishlistItems = await CustomerWishlistService.getWishlist()
+    for (const item of wishlistItems) {
+      await CustomerWishlistService.removeFromWishlist(item.productId._id)
+    }
+  } catch (error: unknown) {
+    // Handle axios error response
+    if (error && typeof error === 'object' && 'response' in error) {
+      const axiosError = error as {
+        response?: { data?: { message?: string; code?: string } }
+      }
+      if (axiosError.response?.data) {
+        return rejectWithValue({
+          message:
+            axiosError.response.data.message || 'Failed to clear wishlist',
+          code: axiosError.response.data.code || 'CLEAR_WISHLIST_ERROR',
+        })
+      }
+    }
+
+    return rejectWithValue({
+      message: 'Failed to clear wishlist',
+      code: 'CLEAR_WISHLIST_ERROR',
+    })
+  }
+})
 
 /**
  * Authentication slice
@@ -246,25 +462,26 @@ const authSlice = createSlice({
     /**
      * Clear authentication error
      */
-    clearError: state => {
-      state.error = null;
+    clearError: (state) => {
+      console.error(' Clear error action:', state)
+      state.error = null
     },
 
     /**
      * Set user data (for client-side user updates)
      */
     setUser: (state, action: PayloadAction<User>) => {
-      state.user = action.payload;
-      state.status = 'authenticated';
+      state.user = action.payload
+      state.status = 'authenticated'
     },
 
     /**
      * Clear authentication state
      */
     resetAuth: state => {
-      state.user = null;
-      state.status = 'unauthenticated';
-      state.error = null;
+      state.user = null
+      state.status = 'unauthenticated'
+      state.error = null
     },
 
     /**
@@ -273,117 +490,235 @@ const authSlice = createSlice({
     initializeAuth: state => {
       // This will be called on app initialization
       // The actual token validation will be handled by axios interceptors
-      state.status = 'idle';
+      state.status = 'idle'
     },
   },
   extraReducers: builder => {
     // Login user cases
     builder
       .addCase(loginUser.pending, state => {
-        state.status = 'loading';
-        state.error = null;
+        state.status = 'loading'
+        state.error = null
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        state.status = 'authenticated';
-        state.user = action.payload.user;
-        state.error = null;
+        state.status = 'authenticated'
+        state.user = action.payload.user
+        state.error = null
       })
       .addCase(loginUser.rejected, (state, action) => {
-        state.status = 'unauthenticated';
-        state.error = action.payload?.message || 'Login failed';
-      });
+        state.status = 'unauthenticated'
+        state.error = action.payload?.message || 'Login failed'
+      })
 
     // Register user cases
     builder
       .addCase(registerUser.pending, state => {
-        state.status = 'loading';
-        state.error = null;
+        state.status = 'loading'
+        state.error = null
       })
-      .addCase(registerUser.fulfilled, (state, action) => {
-        state.status = 'authenticated';
-        state.user = action.payload.user;
-        state.error = null;
+      .addCase(registerUser.fulfilled, state => {
+        state.status = 'authenticated'
+        state.user = null // Registration doesn't return a user object directly
+        state.error = null
       })
       .addCase(registerUser.rejected, (state, action) => {
-        state.status = 'unauthenticated';
-        state.error = action.payload?.message || 'Registration failed';
-      });
+        state.status = 'unauthenticated'
+        state.error = action.payload?.message || 'Registration failed'
+      })
 
     // Logout user cases
     builder.addCase(logoutUser.fulfilled, state => {
-      state.user = null;
-      state.status = 'unauthenticated';
-      state.error = null;
-    });
+      state.user = null
+      state.status = 'unauthenticated'
+      state.error = null
+    })
+
+    // Logout user cases - also handle rejected case
+    builder.addCase(logoutUser.rejected, state => {
+      state.user = null
+      state.status = 'unauthenticated'
+      state.error = null
+    })
 
     // Get profile cases
     builder
       .addCase(getUserProfile.pending, state => {
-        state.status = 'loading';
-        state.error = null;
+        state.status = 'loading'
+        state.error = null
       })
       .addCase(getUserProfile.fulfilled, (state, action) => {
-        state.status = 'authenticated';
-        state.user = action.payload;
-        state.error = null;
+        state.status = 'authenticated'
+        state.user = action.payload
+        state.error = null
       })
       .addCase(getUserProfile.rejected, (state, action) => {
-        state.status = 'unauthenticated';
-        state.user = null;
-        state.error = action.payload?.message || 'Failed to get profile';
-      });
+        state.status = 'unauthenticated'
+        state.user = null
+        state.error =
+          (action.payload as AuthError)?.message || 'Failed to get profile'
+      })
+
+    // Refresh token cases
+    builder
+      .addCase(refreshToken.pending, state => {
+        // Don't change status during refresh
+        state.error = null
+      })
+      .addCase(refreshToken.fulfilled, (state, action) => {
+        // Update user if provided in response
+        if (action.payload.user) {
+          state.user = action.payload.user
+        }
+        state.status = 'authenticated'
+        state.error = null
+      })
+      .addCase(refreshToken.rejected, (state, action) => {
+        state.status = 'unauthenticated'
+        state.user = null
+        state.error =
+          (action.payload as AuthError)?.message || 'Token refresh failed'
+      })
 
     // Forgot password cases
     builder
       .addCase(forgotPassword.pending, state => {
-        state.status = 'loading';
-        state.error = null;
+        state.status = 'loading'
+        state.error = null
       })
       .addCase(forgotPassword.fulfilled, state => {
-        state.status = 'idle';
-        state.error = null;
+        state.status = 'idle'
+        state.error = null
       })
       .addCase(forgotPassword.rejected, (state, action) => {
-        state.status = 'idle';
-        state.error = action.payload?.message || 'Failed to send reset email';
-      });
+        state.status = 'idle'
+        state.error =
+          (action.payload as AuthError)?.message || 'Failed to send reset email'
+      })
 
     // Reset password cases
     builder
       .addCase(resetPassword.pending, state => {
-        state.status = 'loading';
-        state.error = null;
+        state.status = 'loading'
+        state.error = null
       })
       .addCase(resetPassword.fulfilled, state => {
-        state.status = 'idle';
-        state.error = null;
+        state.status = 'idle'
+        state.error = null
       })
       .addCase(resetPassword.rejected, (state, action) => {
-        state.status = 'idle';
-        state.error = action.payload?.message || 'Password reset failed';
-      });
+        state.status = 'idle'
+        state.error =
+          (action.payload as AuthError)?.message || 'Password reset failed'
+      })
 
     // Verify email cases
     builder
       .addCase(verifyEmail.pending, state => {
-        state.status = 'loading';
-        state.error = null;
+        state.status = 'loading'
+        state.error = null
       })
       .addCase(verifyEmail.fulfilled, state => {
-        state.status = 'idle';
-        state.error = null;
+        state.status = 'idle'
+        state.error = null
         // Update user verification status if user is logged in
         if (state.user) {
-          state.user.isEmailVerified = true;
+          state.user.isEmailVerified = true
         }
       })
       .addCase(verifyEmail.rejected, (state, action) => {
-        state.status = 'idle';
-        state.error = action.payload?.message || 'Email verification failed';
-      });
+        state.status = 'idle'
+        state.error =
+          (action.payload as AuthError)?.message || 'Email verification failed'
+      })
+
+    // Resend verification cases
+    builder
+      .addCase(resendVerification.pending, state => {
+        state.status = 'loading'
+        state.error = null
+      })
+      .addCase(resendVerification.fulfilled, state => {
+        state.status = 'idle'
+        state.error = null
+      })
+      .addCase(resendVerification.rejected, (state, action) => {
+        state.status = 'idle'
+        state.error =
+          (action.payload as AuthError)?.message ||
+          'Failed to resend verification email'
+      })
+
+    // Wishlist cases
+    builder
+      .addCase(getWishlist.pending, state => {
+        state.wishlistLoading = true
+        state.error = null
+      })
+      .addCase(getWishlist.fulfilled, (state, action) => {
+        state.wishlist = action.payload
+        state.wishlistLoading = false
+        state.error = null
+      })
+      .addCase(getWishlist.rejected, (state, action) => {
+        state.wishlistLoading = false
+        state.error =
+          (action.payload as AuthError)?.message || 'Failed to get wishlist'
+      })
+
+    builder
+      .addCase(addToWishlist.pending, state => {
+        state.wishlistLoading = true
+        state.error = null
+      })
+      .addCase(addToWishlist.fulfilled, (state, action) => {
+        state.wishlist = [...state.wishlist, action.payload]
+        state.wishlistLoading = false
+        state.error = null
+      })
+      .addCase(addToWishlist.rejected, (state, action) => {
+        state.wishlistLoading = false
+        state.error =
+          (action.payload as AuthError)?.message ||
+          'Failed to add item to wishlist'
+      })
+
+    builder
+      .addCase(removeFromWishlist.pending, state => {
+        state.wishlistLoading = true
+        state.error = null
+      })
+      .addCase(removeFromWishlist.fulfilled, (state, action) => {
+        state.wishlist = state.wishlist.filter(
+          item => item._id !== action.payload
+        )
+        state.wishlistLoading = false
+        state.error = null
+      })
+      .addCase(removeFromWishlist.rejected, (state, action) => {
+        state.wishlistLoading = false
+        state.error =
+          (action.payload as AuthError)?.message ||
+          'Failed to remove item from wishlist'
+      })
+
+    builder
+      .addCase(clearWishlist.pending, state => {
+        state.wishlistLoading = true
+        state.error = null
+      })
+      .addCase(clearWishlist.fulfilled, (state) => {
+        state.wishlist = [] // Clear the wishlist in the state
+        state.wishlistLoading = false
+        state.error = null
+      })
+      .addCase(clearWishlist.rejected, (state) => {
+        state.wishlistLoading = false
+        state.error = 'Failed to clear wishlist'
+      })
   },
-});
+})
 
 export const { clearError, setUser, resetAuth, initializeAuth } =
-  authSlice.actions;
-export default authSlice.reducer;
+  authSlice.actions
+
+export default authSlice.reducer
