@@ -33,9 +33,6 @@ export default async function CampaignsPageComponent() {
     return <CampaignsPage campaigns={campaignsResponse.data} />
   } catch (error) {
     console.error('Failed to fetch campaigns:', error)
-    return {
-      title: 'Campaigns - playableFactory',
-      description: 'Discover amazing deals and campaigns',
-    }
+    return <CampaignsPage campaigns={[]} />
   }
 }

@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react'
 import { AddToCartButton } from '@/components/custom/add-to-cart-button'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { useAppSelector } from '@/hooks/redux'
 import { useWishlist } from '@/hooks/use-wishlist'
 import { CustomerRecommendationService } from '@/services/customer-recommendation.service'
 import type { Product } from '@/types/customer-product'
@@ -40,6 +41,7 @@ export function ProductDetailPage({ product }: ProductDetailPageProps) {
     wishlistLoading,
     loadWishlist,
   } = useWishlist()
+  const { user } = useAppSelector(state => state.auth)
   const [frequentlyBoughtTogether, setFrequentlyBoughtTogether] = useState<
     Product[]
   >([])
@@ -55,14 +57,14 @@ export function ProductDetailPage({ product }: ProductDetailPageProps) {
     loadWishlist()
   }, [loadWishlist])
 
-  // Track view activity
+  // Track view activity - only if user is authenticated
   useEffect(() => {
-    if (product._id) {
+    if (product._id && user) {
       CustomerRecommendationService.trackActivity(product._id, 'view').catch(
         console.error
       )
     }
-  }, [product._id])
+  }, [product._id, user])
 
   // Fetch frequently bought together recommendations
   useEffect(() => {
@@ -75,8 +77,10 @@ export function ProductDetailPage({ product }: ProductDetailPageProps) {
 
   const handleAddToCart = async () => {
     try {
-      // Track cart_add activity
-      await CustomerRecommendationService.trackActivity(product._id, 'cart_add')
+      // Track cart_add activity - only if user is authenticated
+      if (user) {
+        await CustomerRecommendationService.trackActivity(product._id, 'cart_add')
+      }
     } catch (error: unknown) {
       console.log('Add to cart error:', error)
     }
